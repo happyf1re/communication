@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox fx:controller="com.muravlev.communication.ui.UserDashboardController"
+      xmlns:fx="http://javafx.com/fxml" alignment="CENTER" spacing="20">
+
+    <Label fx:id="welcomeLabel" text="Welcome!" style="-fx-font-size: 18px;"/>
+
+    <Label fx:id="userInfoLabel" text="User Info:"/>
+
+    <Button text="Logout" onAction="#logout"/>
+</VBox>
+

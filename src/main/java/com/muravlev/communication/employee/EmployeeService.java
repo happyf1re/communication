@@ -12,10 +12,6 @@ public class EmployeeService {
         this.employeeRepository = employeeRepository;
     }
 
-    public Employee register(Employee employee) {
-        return employeeRepository.save(employee);
-    }
-
     public Optional<Employee> findByUsername(String username) {
         return employeeRepository.findByUsername(username);
     }
@@ -23,4 +19,44 @@ public class EmployeeService {
     public void deleteEmployee(Long id) {
         employeeRepository.deleteById(id);
     }
+
+//    public Employee register(Employee employee) {
+//        // Хэшируем пароль перед сохранением
+//        employee.setPassword(hashPassword(employee.getPassword()));
+//        return employeeRepository.save(employee);
+//    }
+
+    public Employee register(Employee employee) {
+        // Сохраняем пароль без хэширования
+        return employeeRepository.save(employee);
+    }
+
+//    public boolean authenticate(String username, String rawPassword) {
+//        Optional<Employee> employee = employeeRepository.findByUsername(username);
+//        return employee.isPresent() && employee.get().getPassword().equals(hashPassword(rawPassword));
+//    }
+
+    public boolean authenticate(String username, String rawPassword) {
+        Optional<Employee> employee = employeeRepository.findByUsername(username);
+        // Сравниваем пароль без хэширования
+        return employee.isPresent() && employee.get().getPassword().equals(rawPassword);
+    }
+
+//    public String hashPassword(String rawPassword) {
+//        try {
+//            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+//            byte[] encodedHash = digest.digest(rawPassword.getBytes());
+//            StringBuilder hexString = new StringBuilder();
+//            for (byte b : encodedHash) {
+//                String hex = Integer.toHexString(0xff & b);
+//                if (hex.length() == 1) {
+//                    hexString.append('0');
+//                }
+//                hexString.append(hex);
+//            }
+//            return hexString.toString();
+//        } catch (NoSuchAlgorithmException e) {
+//            throw new RuntimeException("Error hashing password", e);
+//        }
+//    }
 }

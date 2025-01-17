@@ -3,6 +3,7 @@ package com.muravlev.communication.ui;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 
 import java.io.OutputStream;
@@ -20,22 +21,23 @@ public class RegistrationController {
     private TextField firstNameField;
     @FXML
     private TextField lastNameField;
+    @FXML
+    private PasswordField passwordField;
 
     @FXML
     public void registerUser() {
         try {
-            // Подготовка данных
             String username = usernameField.getText();
+            String password = passwordField.getText();
             String department = departmentField.getText();
             String firstName = firstNameField.getText();
             String lastName = lastNameField.getText();
 
             String jsonData = String.format(
-                    "{\"username\":\"%s\",\"department\":\"%s\",\"firstName\":\"%s\",\"lastName\":\"%s\"}",
-                    username, department, firstName, lastName
+                    "{\"username\":\"%s\",\"password\":\"%s\",\"department\":\"%s\",\"firstName\":\"%s\",\"lastName\":\"%s\"}",
+                    username, password, department, firstName, lastName
             );
 
-            // Отправка POST-запроса
             URL url = new URL("http://localhost:8080/api/employees/register");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
@@ -47,17 +49,15 @@ public class RegistrationController {
                 os.write(input, 0, input.length);
             }
 
-            // Проверка ответа
             int responseCode = conn.getResponseCode();
             if (responseCode == HttpURLConnection.HTTP_OK) {
-                showAlert(AlertType.INFORMATION, "Success", "User registered successfully!");
+                showAlert(Alert.AlertType.INFORMATION, "Success", "User registered successfully!");
             } else {
-                showAlert(AlertType.ERROR, "Error", "Failed to register user!");
+                showAlert(Alert.AlertType.ERROR, "Error", "Failed to register user!");
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
-            showAlert(AlertType.ERROR, "Error", "An error occurred: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Error", "An error occurred: " + e.getMessage());
         }
     }
 
@@ -67,5 +67,10 @@ public class RegistrationController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    @FXML
+    public void goToLogin() {
+        Main.switchScene("/login_form.fxml", "User Login");
     }
 }

@@ -1,8 +1,10 @@
 package com.muravlev.communication.employee;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -16,7 +18,20 @@ public class EmployeeController {
 
     @PostMapping("/register")
     public ResponseEntity<Employee> register(@RequestBody Employee employee) {
+        // Регистрируем пользователя без хэширования пароля
         return ResponseEntity.ok(employeeService.register(employee));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> login(@RequestBody Map<String, String> credentials) {
+        String username = credentials.get("username");
+        String password = credentials.get("password");
+
+        if (employeeService.authenticate(username, password)) {
+            return ResponseEntity.ok("Login successful!");
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password.");
+        }
     }
 
     @GetMapping("/{username}")

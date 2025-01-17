@@ -8,15 +8,22 @@
     <Label text="Username:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
     <TextField fx:id="usernameField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
 
-    <Label text="Department:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-    <TextField fx:id="departmentField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+    <Label text="Password:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+    <PasswordField fx:id="passwordField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-    <Label text="First Name:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-    <TextField fx:id="firstNameField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+    <Label text="Department:" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+    <TextField fx:id="departmentField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 
-    <Label text="Last Name:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-    <TextField fx:id="lastNameField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+    <Label text="First Name:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+    <TextField fx:id="firstNameField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
 
-    <Button text="Register" onAction="#registerUser" GridPane.rowIndex="4" GridPane.columnIndex="0" GridPane.columnSpan="2" alignment="CENTER"/>
+    <Label text="Last Name:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+    <TextField fx:id="lastNameField" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+    <Button text="Register" onAction="#registerUser" GridPane.rowIndex="5" GridPane.columnIndex="0" GridPane.columnSpan="2" alignment="CENTER"/>
+
+    <Button text="Login" onAction="#goToLogin" GridPane.rowIndex="6" GridPane.columnIndex="0" GridPane.columnSpan="2" alignment="CENTER"/>
 </GridPane>
+
+
 

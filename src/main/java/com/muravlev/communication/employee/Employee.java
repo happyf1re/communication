@@ -18,6 +18,9 @@ public class Employee {
     private String username;
 
     @Column(nullable = false)
+    private String password; // Новый атрибут для пароля
+
+    @Column(nullable = false)
     private String department;
 
     @Column(name = "first_name")
