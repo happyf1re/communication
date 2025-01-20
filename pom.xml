@@ -92,7 +92,23 @@
             <artifactId>javafx-fxml</artifactId>
             <version>20.0.2</version>
         </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-web</artifactId>
+            <version>20.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>20.0.2</version>
+        </dependency>
     </dependencies>
+    <repositories>
+        <repository>
+            <id>openjfx</id>
+            <url>https://maven.pkg.jetbrains.space/public/p/openjfx/org.openjfx</url>
+        </repository>
+    </repositories>
 
     <build>
         <plugins>

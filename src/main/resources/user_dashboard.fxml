@@ -10,7 +10,7 @@
     <Label fx:id="userInfoLabel" text="Your Details:"/>
 
     <Button text="Start Chat" onAction="#startChat"/>
-    <Button text="Start Video Conference" onAction="#startVideoConference"/>
+    <Button text="Start Video Conference" onAction="#startVideoConference" />
     <Button text="Logout" onAction="#logout"/>
 </VBox>
 

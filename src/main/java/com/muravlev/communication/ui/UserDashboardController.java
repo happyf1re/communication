@@ -24,8 +24,7 @@ public class UserDashboardController {
 
     @FXML
     public void startVideoConference() {
-        // TODO: Реализовать функционал видеоконференций
-        System.out.println("Video conference started!");
+        Main.switchScene("/video_chat.fxml", "Video Conference");
     }
 
     @FXML
