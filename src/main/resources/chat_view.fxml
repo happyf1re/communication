@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox fx:controller="com.muravlev.communication.ui.ChatController"
+      xmlns:fx="http://javafx.com/fxml" spacing="10" alignment="CENTER">
+
+    <Label text="Chat Room" style="-fx-font-size: 18px;"/>
+
+    <ListView fx:id="messageList" prefHeight="300" prefWidth="400"/>
+
+    <HBox spacing="10">
+        <TextField fx:id="messageInput" promptText="Type your message here..." HBox.hgrow="ALWAYS"/>
+        <Button text="Send" onAction="#sendMessage"/>
+    </HBox>
+</VBox>
+

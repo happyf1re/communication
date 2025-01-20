@@ -23,26 +23,18 @@ public class Main extends Application {
         primaryStage.show();
     }
 
-    // Метод для установки основного stage
     public static void setPrimaryStage(Stage stage) {
         primaryStage = stage;
     }
 
-    // Метод для получения основного stage
     public static Stage getPrimaryStage() {
         return primaryStage;
     }
 
-    // Метод для смены сцены
     public static void switchScene(String fxmlFile, String title) {
         try {
-            // Загружаем FXML файл
             Parent root = FXMLLoader.load(Main.class.getResource(fxmlFile));
-
-            // Устанавливаем заголовок окна
             primaryStage.setTitle(title);
-
-            // Устанавливаем новую сцену
             primaryStage.setScene(new Scene(root, 400, 300));
         } catch (IOException e) {
             e.printStackTrace();
@@ -53,6 +45,7 @@ public class Main extends Application {
         launch(args);
     }
 }
+
 
 
 

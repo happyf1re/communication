@@ -5,7 +5,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
@@ -24,6 +23,12 @@ public class LoginController {
 
     @FXML
     private PasswordField passwordField;
+
+    private static String loggedInUsername;
+
+    public static String getLoggedInUsername() {
+        return loggedInUsername;
+    }
 
     @FXML
     public void goToRegister() {
@@ -54,6 +59,8 @@ public class LoginController {
 
             int responseCode = conn.getResponseCode();
             if (responseCode == HttpURLConnection.HTTP_OK) {
+                loggedInUsername = username;
+
                 // Получаем данные о пользователе
                 Map<String, String> userInfo = fetchUserInfo(username);
 
@@ -66,17 +73,18 @@ public class LoginController {
                 controller.setUserInfo(
                         userInfo.get("username"),
                         userInfo.get("firstName"),
-                        userInfo.get("lastName")
+                        userInfo.get("lastName"),
+                        userInfo.get("department")
                 );
 
                 stage.setTitle("User Dashboard");
             } else {
-                showAlert(AlertType.ERROR, "Error", "Invalid username or password!");
+                showAlert(Alert.AlertType.ERROR, "Error", "Invalid username or password!");
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            showAlert(AlertType.ERROR, "Error", "An error occurred: " + e.getMessage());
+            showAlert(Alert.AlertType.ERROR, "Error", "An error occurred: " + e.getMessage());
         }
     }
 
@@ -89,7 +97,7 @@ public class LoginController {
         return mapper.readValue(new InputStreamReader(conn.getInputStream()), Map.class);
     }
 
-    private void showAlert(AlertType alertType, String title, String message) {
+    private void showAlert(Alert.AlertType alertType, String title, String message) {
         Alert alert = new Alert(alertType);
         alert.setTitle(title);
         alert.setHeaderText(null);
@@ -97,4 +105,3 @@ public class LoginController {
         alert.showAndWait();
     }
 }
-

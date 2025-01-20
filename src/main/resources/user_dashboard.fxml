@@ -5,10 +5,13 @@
 <VBox fx:controller="com.muravlev.communication.ui.UserDashboardController"
       xmlns:fx="http://javafx.com/fxml" alignment="CENTER" spacing="20">
 
-    <Label fx:id="welcomeLabel" text="Welcome!" style="-fx-font-size: 18px;"/>
+    <Label fx:id="welcomeLabel" text="Welcome, [username]!" style="-fx-font-size: 18px;"/>
 
-    <Label fx:id="userInfoLabel" text="User Info:"/>
+    <Label fx:id="userInfoLabel" text="Your Details:"/>
 
+    <Button text="Start Chat" onAction="#startChat"/>
+    <Button text="Start Video Conference" onAction="#startVideoConference"/>
     <Button text="Logout" onAction="#logout"/>
 </VBox>
+
 

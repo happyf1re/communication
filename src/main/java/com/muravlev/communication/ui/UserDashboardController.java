@@ -11,16 +11,28 @@ public class UserDashboardController {
     @FXML
     private Label userInfoLabel;
 
-    // Метод для установки информации о пользователе
-    public void setUserInfo(String username, String firstName, String lastName) {
+    // Устанавливаем данные о пользователе
+    public void setUserInfo(String username, String firstName, String lastName, String department) {
         welcomeLabel.setText("Welcome, " + firstName + " " + lastName + "!");
-        userInfoLabel.setText("Username: " + username + "\nFull Name: " + firstName + " " + lastName);
+        userInfoLabel.setText("Username: " + username + "\nDepartment: " + department);
+    }
+
+    @FXML
+    public void startChat() {
+        Main.switchScene("/chat_view.fxml", "Chat Room");
+    }
+
+    @FXML
+    public void startVideoConference() {
+        // TODO: Реализовать функционал видеоконференций
+        System.out.println("Video conference started!");
     }
 
     @FXML
     public void logout() {
-        // Переход к экрану логина
+        // Переход на экран логина
         Main.switchScene("/login_form.fxml", "User Login");
     }
 }
+
 
