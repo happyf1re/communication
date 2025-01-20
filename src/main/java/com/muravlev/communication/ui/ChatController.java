@@ -25,8 +25,11 @@ public class ChatController {
 
     private StompSession stompSession;
 
+    private String username;
+
     @FXML
     public void initialize() {
+        username = LoginController.getLoggedInUsername(); // Получение ника пользователя после авторизации
         connectToWebSocket();
     }
 
@@ -63,7 +66,6 @@ public class ChatController {
     public void sendMessage() {
         String message = messageInput.getText();
         if (!message.isEmpty()) {
-            messageList.getItems().add("You: " + message);
             sendMessageOverWebSocket(message);
             messageInput.clear();
         }
@@ -71,7 +73,7 @@ public class ChatController {
 
     public void sendMessageOverWebSocket(String message) {
         if (stompSession != null) {
-            stompSession.send("/app/chat.send", new ChatMessage("YourUsername", message));
+            stompSession.send("/app/chat.send", new ChatMessage(username, message));
         } else {
             System.out.println("WebSocket session is not connected.");
         }
