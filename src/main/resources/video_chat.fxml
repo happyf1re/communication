@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.web.WebView?>
-
-<AnchorPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.muravlev.communication.ui.VideoChatController">
-    <WebView fx:id="webView" layoutX="0.0" layoutY="0.0" prefHeight="600.0" prefWidth="800.0" />
-</AnchorPane>
-
