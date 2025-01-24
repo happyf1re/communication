@@ -9,13 +9,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
- * Хранит соответствие sessionId -> username,
- * чтобы понимать, кто сейчас "онлайн".
+ * Хранит (sessionId -> username), чтобы понимать, кто сейчас в сети.
  */
 @Service
 public class PresenceService {
 
-    // Потокобезопасная map: sessionId -> username
+    // Потокобезопасная Map: sessionId -> username
     private final Map<String, String> sessionIdToUser = new ConcurrentHashMap<>();
 
     public void userConnected(String sessionId, String username) {
@@ -27,10 +26,10 @@ public class PresenceService {
     }
 
     /**
-     * Возвращает множество всех username, которые сейчас онлайн
+     * Возвращает все текущие userName.
      */
     public Set<String> getOnlineUsers() {
-        // Извлекаем все значения (username) и делаем Set, чтобы не дублировать
+        // Собираем values() в Set (на случай, если один юзер в нескольких вкладках)
         return Collections.unmodifiableSet(
                 sessionIdToUser.values().stream().collect(Collectors.toSet())
         );

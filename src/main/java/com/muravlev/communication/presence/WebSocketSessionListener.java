@@ -7,10 +7,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionConnectEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
-/**
- * Отслеживает события CONNECT / DISCONNECT,
- * Чтобы сохранять (sessionId -> username) и рассылает обновленный список.
- */
 @Component
 public class WebSocketSessionListener {
 
@@ -22,30 +18,29 @@ public class WebSocketSessionListener {
 
     @EventListener
     public void handleSessionConnect(SessionConnectEvent event) {
-        // Достаём заголовки STOMP
         StompHeaderAccessor sha = StompHeaderAccessor.wrap(event.getMessage());
-
-        // Читаем login, который клиент передал при stompClient.connect({ login: ...})
         String username = sha.getLogin();
         if (username == null || username.isEmpty()) {
-            // Если клиент почему-то не передал, придумаем
+            // Если клиент не передал login при connect
             username = "Anon-" + sha.getSessionId();
         }
 
-        // Запоминаем
+        // Запоминаем (sessionId -> username)
         presenceService.userConnected(sha.getSessionId(), username);
-        // Рассылаем обновлённый список онлайн-пользователей
+
+        // Рассылаем актуальный список всем подписчикам /topic/onlineUsers
         presenceBroadcaster.broadcastOnlineUsers();
     }
 
     @EventListener
     public void handleSessionDisconnect(SessionDisconnectEvent event) {
         StompHeaderAccessor sha = StompHeaderAccessor.wrap(event.getMessage());
-
         // Удаляем запись
         presenceService.userDisconnected(sha.getSessionId());
-        // Обновляем список
+
+        // Снова рассылаем список, чтобы убрать этого пользователя
         presenceBroadcaster.broadcastOnlineUsers();
     }
 }
+
 
