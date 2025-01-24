@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <title>Login</title>
+
+    <!-- Bootstrap (для красоты) -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <style>
+        .container {
+            max-width: 400px;
+            margin-top: 60px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h3 class="mb-4">Login</h3>
+
+    <div class="mb-3">
+        <label for="username" class="form-label">Username</label>
+        <input type="text" class="form-control" id="username" />
+    </div>
+
+    <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" class="form-control" id="password" />
+    </div>
+
+    <button id="loginBtn" class="btn btn-primary">Login</button>
+    <a href="/register.html" class="btn btn-link">Register</a>
+
+    <div id="errorMsg" class="text-danger mt-3" style="display: none;"></div>
+</div>
+
+<!-- Bootstrap bundle (опционально) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const loginBtn = document.getElementById('loginBtn');
+        loginBtn.addEventListener('click', loginUser);
+    });
+
+    async function loginUser() {
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value.trim();
+
+        if (!username || !password) {
+            showError("Please enter username and password.");
+            return;
+        }
+
+        // Отправляем запрос на бэкенд
+        try {
+            const response = await fetch("/api/employees/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password })
+            });
+            if (response.ok) {
+                // Сохраняем username
+                localStorage.setItem("username", username);
+                // Переходим на главную (index.html)
+                window.location.href = "/";
+            } else {
+                showError("Invalid username or password.");
+            }
+        } catch (err) {
+            showError("Error: " + err);
+        }
+    }
+
+    function showError(msg) {
+        const errDiv = document.getElementById('errorMsg');
+        errDiv.textContent = msg;
+        errDiv.style.display = "block";
+    }
+</script>
+</body>
+</html>

@@ -1,21 +1,26 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8"/>
     <title>Communication Demo</title>
-
-    <!-- Bootstrap (для стилей, не обязательно) -->
+    <!-- Bootstrap CSS -->
     <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
-
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
     <style>
-        /* Небольшие стили для чата */
+        body { margin: 0; padding: 0; }
+        #userList {
+            border: 1px solid #ccc;
+            min-height: 200px;
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 8px;
+        }
         #messageList {
             border: 1px solid #ccc;
             height: 300px;
             overflow-y: auto;
             margin-bottom: 10px;
-            padding: 5px;
+            padding: 8px;
         }
         .message {
             border-bottom: 1px dashed #aaa;
@@ -29,41 +34,59 @@
         }
     </style>
 </head>
-<body class="p-3">
+<body>
 
-<div class="container">
-    <h2 class="mb-3">Communication Demo (Chat + Jitsi)</h2>
-
-    <!-- Блок для чата -->
-    <div class="mb-3">
-        <h5>Chat</h5>
-        <div id="messageList"></div>
-        <div class="input-group">
-            <input type="text" class="form-control" id="messageInput" placeholder="Type message..." />
-            <button id="sendBtn" class="btn btn-primary">Send</button>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">CommunicationApp</a>
+        <div class="d-flex ms-auto">
+            <button class="btn btn-outline-light" id="logoutBtn">Logout</button>
         </div>
     </div>
+</nav>
 
-    <!-- Блок для видеоконференции -->
-    <div class="mb-3">
-        <h5>Video Conference</h5>
-        <div id="jitsiContainer"></div>
+<div class="container-fluid mt-3">
+    <div class="row">
+        <!-- Левая колонка: пользователи -->
+        <div class="col-3">
+            <h5>Online Users</h5>
+            <div id="userList"></div>
+        </div>
+        <!-- Средняя колонка: чат -->
+        <div class="col-4">
+            <h5>Chat</h5>
+            <div id="messageList"></div>
+            <div class="input-group">
+                <input type="text" class="form-control" id="messageInput" placeholder="Type a message...">
+                <button class="btn btn-primary" id="sendBtn">Send</button>
+            </div>
+        </div>
+        <!-- Правая колонка: видеоконференция -->
+        <div class="col-5">
+            <h5>Video Conference</h5>
+            <div id="jitsiContainer"></div>
+        </div>
     </div>
 </div>
 
-<!-- Bootstrap JS (не обязательно) -->
+<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- SockJS -->
+<!-- SockJS + STOMP + Jitsi -->
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
-
-<!-- STOMP (ИСПРАВЛЕНА ССЫЛКА) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
-
-<!-- Jitsi External API -->
 <script src="https://meet.jit.si/external_api.js"></script>
 
-<!-- Ваш клиентский код -->
+<!-- app.js -->
 <script src="app.js"></script>
+
+<script>
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+        localStorage.removeItem('username');
+        window.location.href = "/login.html";
+    });
+</script>
+
 </body>
 </html>

@@ -7,13 +7,15 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class WebSocketChatController {
 
-    @MessageMapping("/chat.send") // Маршрут для отправки сообщений
-    @SendTo("/topic/messages") // Отправляем сообщения подписчикам
+    // Приходит /app/chat.send => этот метод
+    @MessageMapping("/chat.send")
+    @SendTo("/topic/messages")
     public ChatMessage sendMessage(ChatMessage message) {
         System.out.println("Получено сообщение через WebSocket: " + message.getText());
-        return message;
+        return message; // просто ретранслируем
     }
 }
+
 
 
 
