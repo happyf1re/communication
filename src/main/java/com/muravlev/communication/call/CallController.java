@@ -7,7 +7,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 /**
- * Контроллер для приглашений "Позвонить" (видеозвонок).
+ * Контроллер для логики вызовов (vсall.invite).
  */
 @Controller
 public class CallController {
@@ -15,10 +15,11 @@ public class CallController {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
-    @MessageMapping("/call.invite") // => /app/call.invite
+    @MessageMapping("/call.invite") // => "/app/call.invite"
     public void inviteUser(CallInvite invite) {
-        // Отправляем direct message пользователю invite.to
-        // => /user/<to>/queue/callInvites
+        // invite = { from: "...", to: "...", room: "..." }
+        // Пересылаем личное сообщение пользователю invite.to
+        // => /user/{invite.to}/queue/callInvites
         messagingTemplate.convertAndSendToUser(
                 invite.getTo(),
                 "/queue/callInvites",
@@ -28,10 +29,13 @@ public class CallController {
 
     @Data
     public static class CallInvite {
-        private String from; // кто инициатор
+        private String from; // инициатор
         private String to;   // кого вызываем
-        private String room; // имя комнаты Jitsi
+        private String room; // название комнаты
     }
+
+    //192.168.0.185
 }
+
 
 

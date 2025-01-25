@@ -61,19 +61,19 @@ function connectWebSocket() {
         });
 
         // Подписываемся на личные приглашения
-        stompClient.subscribe('/user/queue/callInvites', msg => {
-            let invite = JSON.parse(msg.body); // { from, to, room }
-            console.log("Got call invite:", invite);
-            let accept = confirm(`User ${invite.from} invites you to a call. Room: ${invite.room}\nAccept?`);
-            if (accept) {
+        stompClient.subscribe("/user/queue/callInvites", msg => {
+            let invite = JSON.parse(msg.body);
+            console.log("Call invite from:", invite.from, "for room:", invite.room);
+            let ok = confirm(`User ${invite.from} invites you to a call. Accept?`);
+            if (ok) {
                 initJitsi(invite.room);
             }
         });
 
         // Подписка на общий чат
-        stompClient.subscribe('/topic/messages', msg => {
-            let body = JSON.parse(msg.body);
-            addMessageToUI(body.username, body.text);
+        stompClient.subscribe("/topic/messages", msg => {
+            let chatMsg = JSON.parse(msg.body);
+            addMessageToUI(chatMsg.username, chatMsg.text);
         });
 
     }, err => {
@@ -129,18 +129,14 @@ function updateUserList(users) {
     });
 }
 
-/**
- * "Позвонить" пользователю
- */
 function callUser(targetUser) {
-    let roomName = "CallRoom_" + Date.now();
-    // Отправляем invite
+    const roomName = "Room_" + Date.now();
     stompClient.send("/app/call.invite", {}, JSON.stringify({
         from: currentUser,
         to: targetUser,
         room: roomName
     }));
-    // Сами входим
+    // сам тоже заходим
     initJitsi(roomName);
 }
 
