@@ -5,7 +5,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
 /**
- * Рассылает список онлайн-пользователей в /topic/onlineUsers.
+ * Рассылает текущее множество пользователей на топик /topic/onlineUsers.
  */
 @Component
 public class PresenceBroadcaster {
@@ -16,14 +16,16 @@ public class PresenceBroadcaster {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
+    /**
+     * Отправляем список онлайн-пользователей в /topic/onlineUsers.
+     */
     public void broadcastOnlineUsers() {
-        // Берём всех онлайн-пользователей из PresenceService
-        // и отправляем на общий топик
-        messagingTemplate.convertAndSend(
-                "/topic/onlineUsers",
-                presenceService.getOnlineUsers()
-        );
+        // Берём всех онлайн
+        var users = presenceService.getOnlineUsers();
+        // Шлём (например, ["User1", "User2"])
+        messagingTemplate.convertAndSend("/topic/onlineUsers", users);
     }
 }
+
 
 

@@ -9,29 +9,34 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
- * Хранит (sessionId -> username), чтобы понимать, кто сейчас в сети.
+ * Хранит (sessionId -> username).
  */
 @Service
 public class PresenceService {
 
-    // Потокобезопасная Map: sessionId -> username
     private final Map<String, String> sessionIdToUser = new ConcurrentHashMap<>();
 
+    /**
+     * Запоминаем, что sessionId принадлежит username.
+     */
     public void userConnected(String sessionId, String username) {
         sessionIdToUser.put(sessionId, username);
     }
 
+    /**
+     * Удаляем запись.
+     */
     public void userDisconnected(String sessionId) {
         sessionIdToUser.remove(sessionId);
     }
 
     /**
-     * Возвращает все текущие userName.
+     * Возвращаем уникальное множество usernames, которые сейчас в сети.
      */
     public Set<String> getOnlineUsers() {
-        // Собираем values() в Set (на случай, если один юзер в нескольких вкладках)
         return Collections.unmodifiableSet(
                 sessionIdToUser.values().stream().collect(Collectors.toSet())
         );
     }
 }
+

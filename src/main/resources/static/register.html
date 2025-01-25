@@ -1,62 +1,53 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8"/>
-    <title>Register</title>
-
-    <!-- Bootstrap -->
+    <meta charset="UTF-8">
+    <title>Register (Cookie-based)</title>
     <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
     <style>
         .container {
             max-width: 400px;
-            margin-top: 60px;
+            margin-top: 50px;
         }
     </style>
 </head>
 <body>
-
 <div class="container">
     <h3 class="mb-4">Register</h3>
 
     <div class="mb-3">
         <label for="username" class="form-label">Username</label>
-        <input type="text" class="form-control" id="username" />
+        <input type="text" class="form-control" id="username"/>
     </div>
 
     <div class="mb-3">
         <label for="password" class="form-label">Password</label>
-        <input type="password" class="form-control" id="password" />
+        <input type="password" class="form-control" id="password"/>
     </div>
 
     <div class="mb-3">
         <label for="department" class="form-label">Department (optional)</label>
-        <input type="text" class="form-control" id="department" />
+        <input type="text" class="form-control" id="department"/>
     </div>
 
     <div class="mb-3">
         <label for="firstName" class="form-label">First Name (optional)</label>
-        <input type="text" class="form-control" id="firstName" />
+        <input type="text" class="form-control" id="firstName"/>
     </div>
 
     <div class="mb-3">
         <label for="lastName" class="form-label">Last Name (optional)</label>
-        <input type="text" class="form-control" id="lastName" />
+        <input type="text" class="form-control" id="lastName"/>
     </div>
 
     <button id="registerBtn" class="btn btn-primary">Register</button>
     <a href="/login.html" class="btn btn-link">Login</a>
-
-    <div id="errorMsg" class="text-danger mt-3" style="display:none;"></div>
 </div>
-
-<!-- Bootstrap bundle (optional) -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const registerBtn = document.getElementById('registerBtn');
-        registerBtn.addEventListener('click', registerUser);
+        document.getElementById('registerBtn').addEventListener('click', registerUser);
     });
 
     async function registerUser() {
@@ -67,7 +58,7 @@
         const lastName = document.getElementById('lastName').value.trim();
 
         if (!username || !password) {
-            showError("Username and password are required!");
+            alert("Username and password are required!");
             return;
         }
 
@@ -79,28 +70,34 @@
             lastName
         };
 
-        try {
-            const response = await fetch("/api/employees/register", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            });
-            if (response.ok) {
-                // Зарегистрировались успешно, теперь можно сделать auto-login
-                localStorage.setItem("username", username);
-                window.location.href = "/";
-            } else {
-                showError("Failed to register user. Possibly username is taken?");
-            }
-        } catch (err) {
-            showError("Error: " + err);
+        // Регистрируем (обычный POST /api/employees/register)
+        const resp = await fetch("/api/employees/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+        if (resp.ok) {
+            alert("Registration successful! Now logging in...");
+            // После регистрации — логинимся (через cookie)
+            loginAfterRegister(username, password);
+        } else {
+            alert("Failed to register user (maybe username taken)");
         }
     }
 
-    function showError(msg) {
-        const errDiv = document.getElementById('errorMsg');
-        errDiv.textContent = msg;
-        errDiv.style.display = "block";
+    async function loginAfterRegister(username, password) {
+        const resp = await fetch("/api/employees/cookie/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ username, password })
+        });
+        if (resp.ok) {
+            window.location.href = "/";
+        } else {
+            alert("Registered but failed to login automatically — go login manually.");
+            window.location.href = "/login.html";
+        }
     }
 </script>
 </body>

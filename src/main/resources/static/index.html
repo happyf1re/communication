@@ -2,8 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8"/>
-    <title>Communication Demo</title>
-    <!-- Bootstrap CSS -->
+    <title>Communication Demo (Cookie-based)</title>
     <link rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
     <style>
@@ -36,32 +35,31 @@
 </head>
 <body>
 
+<!-- Навигационная панель -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="#">CommunicationApp</a>
+        <a class="navbar-brand" href="#">CommunicationApp (Cookie)</a>
         <div class="d-flex ms-auto">
             <button class="btn btn-outline-light" id="logoutBtn">Logout</button>
         </div>
     </div>
 </nav>
 
+<!-- Три колонки -->
 <div class="container-fluid mt-3">
     <div class="row">
-        <!-- Левая колонка: пользователи -->
         <div class="col-3">
             <h5>Online Users</h5>
             <div id="userList"></div>
         </div>
-        <!-- Средняя колонка: чат -->
         <div class="col-4">
             <h5>Chat</h5>
             <div id="messageList"></div>
             <div class="input-group">
-                <input type="text" class="form-control" id="messageInput" placeholder="Type a message...">
+                <input type="text" class="form-control" id="messageInput" placeholder="Type message...">
                 <button class="btn btn-primary" id="sendBtn">Send</button>
             </div>
         </div>
-        <!-- Правая колонка: видеоконференция -->
         <div class="col-5">
             <h5>Video Conference</h5>
             <div id="jitsiContainer"></div>
@@ -69,24 +67,26 @@
     </div>
 </div>
 
-<!-- Bootstrap JS -->
+<!-- Bootstrap bundle -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- SockJS + STOMP + Jitsi -->
+<!-- SockJS + STOMP + Jitsi external -->
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 <script src="https://meet.jit.si/external_api.js"></script>
 
-<!-- app.js -->
-<script src="app.js"></script>
+<!-- Cookie-based app_cookie.js -->
+<script src="app_cookie.js"></script>
 
 <script>
-    // Logout
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-        localStorage.removeItem('username');
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+        // POST /api/employees/cookie/logout
+        await fetch("/api/employees/cookie/logout", {
+            method: "POST",
+            credentials: "include"
+        });
+        // Кука стёрта, редиректим на login
         window.location.href = "/login.html";
     });
 </script>
-
 </body>
 </html>
