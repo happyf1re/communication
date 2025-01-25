@@ -30,8 +30,8 @@ public class UserInterceptor implements ChannelInterceptor {
             // Назначаем principal = наш логин
             sha.setUser(new StompPrincipal(login));
         }
-
         return message;
     }
+
 }
 

@@ -80,5 +80,6 @@ public class EmployeeCookieController {
         response.addCookie(cookie);
         return ResponseEntity.ok("Cookie cleared, logged out");
     }
+
 }
 

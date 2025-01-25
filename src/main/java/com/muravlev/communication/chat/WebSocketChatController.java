@@ -13,6 +13,7 @@ public class WebSocketChatController {
     public ChatMessage sendMessage(ChatMessage message) {
         System.out.println("Получено сообщение через WebSocket: " + message.getText());
         return message; // просто ретранслируем
+
     }
 }
 

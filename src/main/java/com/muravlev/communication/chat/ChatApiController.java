@@ -15,5 +15,6 @@ public class ChatApiController {
         System.out.println("Received REST message from " + message.getUsername() + ": " + message.getText());
         return ResponseEntity.ok("Message received");
     }
+
 }
 

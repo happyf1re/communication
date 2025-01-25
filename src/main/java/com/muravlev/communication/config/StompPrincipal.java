@@ -17,4 +17,5 @@ public class StompPrincipal implements Principal {
     public String getName() {
         return name;
     }
+
 }

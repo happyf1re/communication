@@ -25,6 +25,7 @@ public class PresenceBroadcaster {
         // Шлём (например, ["User1", "User2"])
         messagingTemplate.convertAndSend("/topic/onlineUsers", users);
     }
+
 }
 
 

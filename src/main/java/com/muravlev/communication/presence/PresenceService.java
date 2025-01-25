@@ -38,5 +38,6 @@ public class PresenceService {
                 sessionIdToUser.values().stream().collect(Collectors.toSet())
         );
     }
+
 }
 

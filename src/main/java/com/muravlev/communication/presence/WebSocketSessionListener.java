@@ -45,6 +45,7 @@ public class WebSocketSessionListener {
         // И снова рассылаем
         presenceBroadcaster.broadcastOnlineUsers();
     }
+
 }
 
 

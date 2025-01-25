@@ -33,6 +33,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         // <-- ВАЖНО: добавляем наш interceptor в цепочку inboundChannel
         registration.interceptors(userInterceptor);
     }
+
 }
 
 
