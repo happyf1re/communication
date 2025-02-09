@@ -2,11 +2,14 @@
 <html>
 <head>
     <meta charset="UTF-8"/>
-    <title>Communication Demo (Cookie-based)</title>
+    <title>Communication Rooms Demo</title>
+    <!-- Bootstrap CSS -->
     <link rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
     <style>
         body { margin: 0; padding: 0; }
+
+        /* Секция со списком пользователей (или комнат) */
         #userList {
             border: 1px solid #ccc;
             min-height: 200px;
@@ -14,6 +17,8 @@
             overflow-y: auto;
             padding: 8px;
         }
+
+        /* Секция для чата */
         #messageList {
             border: 1px solid #ccc;
             height: 300px;
@@ -26,42 +31,61 @@
             margin-bottom: 5px;
             padding-bottom: 5px;
         }
+
+        /* Блок списка комнат */
+        #roomList {
+            border: 1px solid #ccc;
+            min-height: 100px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 8px;
+        }
+
+        /* Контейнер для Jitsi (в 2 раза выше: 800px) */
         #jitsiContainer {
             border: 1px solid #ccc;
             width: 100%;
-            height: 400px;
+            height: 800px; /* Увеличенная высота */
         }
     </style>
 </head>
 <body>
 
-<!-- Навигационная панель -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="#">CommunicationApp (Cookie)</a>
+        <a class="navbar-brand" href="#">CommunicationApp (Rooms)</a>
         <div class="d-flex ms-auto">
             <button class="btn btn-outline-light" id="logoutBtn">Logout</button>
         </div>
     </div>
 </nav>
 
-<!-- Три колонки -->
 <div class="container-fluid mt-3">
     <div class="row">
+        <!-- Левая колонка: список комнат -->
         <div class="col-3">
-            <h5>Online Users</h5>
-            <div id="userList"></div>
+            <h5>Active Rooms</h5>
+            <div id="roomList"></div>
+            <div class="input-group mt-2">
+                <input type="text" class="form-control" id="roomNameInput" placeholder="Enter room name..." />
+                <button class="btn btn-primary" id="createRoomBtn">Create Room</button>
+            </div>
         </div>
+
+        <!-- Средняя колонка: чат (при желании) -->
         <div class="col-4">
-            <h5>Chat</h5>
+            <h5>Chat (optional)</h5>
             <div id="messageList"></div>
             <div class="input-group">
-                <input type="text" class="form-control" id="messageInput" placeholder="Type message...">
+                <input type="text" class="form-control" id="messageInput" placeholder="Type message..." />
                 <button class="btn btn-primary" id="sendBtn">Send</button>
             </div>
         </div>
+
+        <!-- Правая колонка: видеоконференция (Jitsi) -->
         <div class="col-5">
             <h5>Video Conference</h5>
+            <!-- Увеличенная высота Jitsi -->
             <div id="jitsiContainer"></div>
         </div>
     </div>
@@ -69,24 +93,166 @@
 
 <!-- Bootstrap bundle -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<!-- SockJS + STOMP + Jitsi external -->
+<!-- SockJS + STOMP + Jitsi -->
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 <script src="https://meet.jit.si/external_api.js"></script>
 
-<!-- Cookie-based app.js -->
-<script src="app_cookie.js"></script>
-
 <script>
-    document.getElementById('logoutBtn').addEventListener('click', async () => {
-        // POST /api/employees/cookie/logout
-        await fetch("/api/employees/cookie/logout", {
-            method: "POST",
-            credentials: "include"
+    let currentUser = "Anon"; // Или берём из cookie/localStorage (зависит от вашей авторизации)
+    let jitsiApi = null;
+    let stompClient = null; // Если используете чат на STOMP
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        // (Пример) Если у вас cookie-based логика:
+        currentUser = await whoAmI();
+        console.log("Identified user:", currentUser);
+
+        // Подключить STOMP (если нужен чат)
+        connectStomp();
+
+        // Подгрузить список комнат
+        loadRooms();
+
+        // Событие на кнопку "Create Room"
+        document.getElementById('createRoomBtn').addEventListener('click', createRoom);
+
+        // Событие на кнопку "Send" (чат)
+        document.getElementById('sendBtn').addEventListener('click', sendChatMessage);
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await fetch("/api/employees/cookie/logout", {
+                method: "POST",
+                credentials: "include"
+            });
+            window.location.href = "/login.html";
         });
-        // Кука стёрта, редиректим на login
-        window.location.href = "/login.html";
     });
+
+    // Пример whoAmI()
+    async function whoAmI() {
+        try {
+            const resp = await fetch("/api/employees/cookie/whoami", {
+                method: "GET",
+                credentials: "include"
+            });
+            if (resp.ok) {
+                return await resp.text(); // server returns username
+            } else {
+                // not logged in
+                window.location.href = "/login.html";
+            }
+        } catch (err) {
+            console.error(err);
+            window.location.href = "/login.html";
+        }
+        return "Anon";
+    }
+
+    // Подключение STOMP для чата
+    function connectStomp() {
+        const socket = new SockJS('/ws');
+        stompClient = Stomp.over(socket);
+        stompClient.debug = null;
+
+        stompClient.connect({ login: currentUser }, frame => {
+            console.log("STOMP connected:", frame);
+
+            // Подписка на общий чат
+            stompClient.subscribe('/topic/messages', msg => {
+                const body = JSON.parse(msg.body);
+                addMessageToChat(body.username, body.text);
+            });
+
+        }, err => {
+            console.error("STOMP connect error:", err);
+        });
+    }
+
+    // Чат
+    function sendChatMessage() {
+        if (!stompClient) return;
+        const input = document.getElementById('messageInput');
+        const text = input.value.trim();
+        if (!text) return;
+        const payload = { username: currentUser, text };
+        stompClient.send("/app/chat.send", {}, JSON.stringify(payload));
+        input.value = "";
+    }
+
+    function addMessageToChat(username, text) {
+        const list = document.getElementById('messageList');
+        if (!list) return;
+        const div = document.createElement('div');
+        div.classList.add('message');
+        div.innerHTML = `<strong>${username}:</strong> ${text}`;
+        list.appendChild(div);
+        list.scrollTop = list.scrollHeight;
+    }
+
+    // Загрузка списка комнат
+    async function loadRooms() {
+        try {
+            const resp = await fetch("/api/rooms");
+            const rooms = await resp.json();
+            const roomListDiv = document.getElementById('roomList');
+            roomListDiv.innerHTML = "";
+            rooms.forEach(r => {
+                roomListDiv.innerHTML += `
+          <div>
+            ${r}
+            <button class="btn btn-sm btn-success" onclick="joinRoom('${r}')">Join</button>
+          </div>
+        `;
+            });
+        } catch (err) {
+            console.error("Failed to load rooms:", err);
+        }
+    }
+
+    // Создание комнаты
+    async function createRoom() {
+        const input = document.getElementById('roomNameInput');
+        const roomName = input.value.trim();
+        if (!roomName) return;
+        try {
+            await fetch("/api/rooms?name=" + encodeURIComponent(roomName), {
+                method: "POST"
+            });
+            input.value = "";
+            loadRooms(); // Обновить список
+        } catch (err) {
+            console.error("Failed to create room:", err);
+        }
+    }
+
+    // Подключиться к комнате
+    function joinRoom(roomName) {
+        initJitsi(roomName);
+    }
+
+    // Инициализация Jitsi (увеличенная высота)
+    function initJitsi(roomName) {
+        if (!roomName) {
+            roomName = "Room_" + Date.now();
+        }
+        if (jitsiApi) {
+            jitsiApi.dispose();
+        }
+
+        const domain = "meet.jit.si";
+        const options = {
+            roomName: roomName,
+            parentNode: document.getElementById('jitsiContainer'),
+            width: '100%',
+            height: '800px', // 2 раза выше
+            userInfo: { displayName: currentUser }
+        };
+        jitsiApi = new JitsiMeetExternalAPI(domain, options);
+        console.log("Jitsi started in room:", roomName);
+    }
 </script>
+
 </body>
 </html>

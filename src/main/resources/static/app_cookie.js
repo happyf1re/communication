@@ -52,6 +52,7 @@ function connectWebSocket() {
     // Выполняем CONNECT
     stompClient.connect({ login: currentUser }, frame => {
         console.log("STOMP connected as", currentUser, frame);
+        console.log("STOMP connected", frame);
 
         // Подписываемся на /topic/onlineUsers
         stompClient.subscribe('/topic/onlineUsers', msg => {
@@ -144,10 +145,11 @@ function callUser(targetUser) {
  * Инициализация Jitsi
  */
 function initJitsi(roomName) {
+    if (!roomName) roomName = "Room_" + Date.now();
     if (jitsiApi) jitsiApi.dispose();
 
-    let domain = "meet.jit.si";
-    let options = {
+    const domain = "meet.jit.si";
+    const options = {
         roomName: roomName,
         parentNode: document.getElementById('jitsiContainer'),
         width: '100%',

@@ -2,14 +2,13 @@ package com.muravlev.communication.config;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.simp.stomp.StompCommand;
-import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.messaging.support.ChannelInterceptor;
+import org.springframework.messaging.simp.stomp.*;
 import org.springframework.stereotype.Component;
+import org.springframework.messaging.support.ChannelInterceptor;
+import org.springframework.messaging.support.MessageBuilder;
 
 /**
- * Перехватчик, который при CONNECT вытаскивает login: из заголовка
- * и прописывает его в accessor.setUser(...).
+ * Interceptor, чтобы login -> Principal
  */
 @Component
 public class UserInterceptor implements ChannelInterceptor {
@@ -18,20 +17,31 @@ public class UserInterceptor implements ChannelInterceptor {
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor sha = StompHeaderAccessor.wrap(message);
 
-        // Если это CONNECT кадр
         if (StompCommand.CONNECT.equals(sha.getCommand())) {
-            // Берём логин (sha.getLogin() — то, что клиент передал при stompClient.connect({login: ...}))
+
             String login = sha.getLogin();
             if (login == null || login.isEmpty()) {
-                // fallback
                 login = "anon-" + sha.getSessionId();
             }
 
-            // Назначаем principal = наш логин
-            sha.setUser(new StompPrincipal(login));
+            // Лог для проверки
+            System.out.println(">>>>> CONNECT: login=" + login + " sessionId=" + sha.getSessionId());
+
+            StompPrincipal principal = new StompPrincipal(login);
+
+            // Ставим Principal
+            sha.setUser(principal);
+
+            // ВАЖНО: делаем аксессор «mutable» прежде чем вернуть
+            sha.setLeaveMutable(true);
+
+            // Создаём новое сообщение, у которого в заголовках уже user = principal
+            return MessageBuilder.createMessage(message.getPayload(), sha.getMessageHeaders());
         }
+
         return message;
     }
-
 }
+
+
 

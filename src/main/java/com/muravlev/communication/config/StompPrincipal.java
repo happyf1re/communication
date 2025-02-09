@@ -2,11 +2,7 @@ package com.muravlev.communication.config;
 
 import java.security.Principal;
 
-/**
- * Простейшая обёртка, где name = наш логин
- */
 public class StompPrincipal implements Principal {
-
     private final String name;
 
     public StompPrincipal(String name) {
@@ -17,5 +13,5 @@ public class StompPrincipal implements Principal {
     public String getName() {
         return name;
     }
-
 }
+
