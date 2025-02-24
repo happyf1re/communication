@@ -2,24 +2,32 @@
 <html>
 <head>
     <meta charset="UTF-8"/>
-    <title>Communication App (1-on-1 Calls)</title>
+    <title>Communication App (1-on-1 Calls + Rooms)</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
     <style>
         body { margin: 0; padding: 0; }
 
-        /* Секция со списком пользователей */
-        #userList {
+        /* Секция со списком комнат */
+        #roomList {
             border: 1px solid #ccc;
-            min-height: 200px;
-            max-height: 500px;
+            min-height: 100px;
+            max-height: 300px;
             overflow-y: auto;
             padding: 8px;
-
         }
 
-        /* Секция для чата (опционально) */
+        /* Секция для списка пользователей */
+        #userList {
+            border: 1px solid #ccc;
+            min-height: 100px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 8px;
+        }
+
+        /* Секция для чата */
         #messageList {
             border: 1px solid #ccc;
             height: 300px;
@@ -37,7 +45,7 @@
         #jitsiContainer {
             border: 1px solid #ccc;
             width: 100%;
-            height: 600px;
+            height: 600px; /* При желании меняйте высоту */
         }
     </style>
 </head>
@@ -45,7 +53,7 @@
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="#">CommunicationApp (1-on-1 Calls)</a>
+        <a class="navbar-brand" href="#">CommunicationApp (1-on-1 Calls + Rooms)</a>
         <div class="d-flex ms-auto">
             <button class="btn btn-outline-light" id="logoutBtn">Logout</button>
         </div>
@@ -54,26 +62,41 @@
 
 <div class="container-fluid mt-3">
     <div class="row">
-        <!-- Левая колонка: список пользователей онлайн (просто пример) -->
+        <!-- Левая колонка: список комнат -->
+        <div class="col-3">
+            <h5>Active Rooms</h5>
+            <div id="roomList"></div>
+            <div class="input-group mt-2">
+                <input type="text" class="form-control" id="roomNameInput" placeholder="Enter room name..." />
+                <button class="btn btn-primary" id="createRoomBtn">Create Room</button>
+            </div>
+        </div>
+
+        <!-- Средняя колонка: список пользователей онлайн -->
         <div class="col-3">
             <h5>Online Users</h5>
             <div id="userList"></div>
         </div>
 
-        <!-- Средняя колонка: чат (при желании) -->
-        <div class="col-4">
-            <h5>Chat</h5>
-            <div id="messageList"></div>
-            <div class="input-group">
-                <input type="text" class="form-control" id="messageInput" placeholder="Type message..." />
-                <button class="btn btn-primary" id="sendBtn">Send</button>
+        <!-- Правая колонка: делим на чат и видеоконференцию -->
+        <div class="col-6">
+            <div class="row mb-3">
+                <div class="col-12">
+                    <h5>Chat</h5>
+                    <div id="messageList"></div>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="messageInput" placeholder="Type message..." />
+                        <button class="btn btn-primary" id="sendBtn">Send</button>
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <!-- Правая колонка: Jitsi (видеозвонок) -->
-        <div class="col-5">
-            <h5>Video Call</h5>
-            <div id="jitsiContainer"></div>
+            <div class="row">
+                <div class="col-12">
+                    <h5>Video Conference / Call</h5>
+                    <div id="jitsiContainer"></div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -88,24 +111,29 @@
 <script>
     // Глобальные переменные
     let stompClient = null;
-    let currentUser = null; // актуальный логин, берём из cookie или запроса "whoami"
+    let currentUser = null; // актуальный логин, берём из cookie (см. whoAmI)
     let jitsiApi = null;
 
     document.addEventListener('DOMContentLoaded', () => {
-        // 1) Определяем текущего пользователя (cookie-based), если не залогинен — редирект
+        // 1) Проверяем "Кто я?" через /api/employees/cookie/whoami
         whoAmI()
             .then(name => {
                 currentUser = name;
                 console.log("Identified as:", currentUser);
                 // 2) Подключаемся к STOMP
                 connectWebSocket();
+                // 3) Загружаем список комнат
+                loadRooms();
             })
             .catch(err => {
                 console.log("Not logged in:", err);
                 window.location.href = "/login.html";
             });
 
-        // Кнопка "Send" для чата
+        // Кнопка "Create Room"
+        document.getElementById('createRoomBtn').addEventListener('click', createRoom);
+
+        // Кнопка "Send" (чат)
         document.getElementById('sendBtn').addEventListener('click', sendChatMessage);
 
         // Logout
@@ -115,51 +143,50 @@
         });
     });
 
-    // Запрашиваем /api/employees/cookie/whoami
+    // Кто я?
     async function whoAmI() {
         const resp = await fetch("/api/employees/cookie/whoami", {
             method: "GET",
             credentials: "include"
         });
         if (resp.ok) {
-            return await resp.text(); // строка с именем
+            return await resp.text(); // имя пользователя
         } else {
             throw new Error("Not authorized");
         }
     }
 
-    // Подключение к /ws через SockJS + STOMP
+    // Подключение к STOMP
     function connectWebSocket() {
         const socket = new SockJS('/ws');
         stompClient = Stomp.over(socket);
-        // Отключаем подробный лог STOMP:
-        stompClient.debug = null;
+        stompClient.debug = null; // отключаем лишний лог
 
         stompClient.connect({ login: currentUser }, frame => {
             console.log("STOMP connected as", currentUser, frame);
 
-            // Подписываемся на /topic/onlineUsers (если есть PresenceBroadcaster)
+            // Список онлайн-пользователей
             stompClient.subscribe('/topic/onlineUsers', msg => {
                 let users = JSON.parse(msg.body);
                 console.log("Got /topic/onlineUsers:", users);
                 updateUserList(users);
             });
 
-            // Подписываемся на личные приглашения /user/queue/callInvites
+            // Личные приглашения
             stompClient.subscribe("/user/queue/callInvites", msg => {
                 let invite = JSON.parse(msg.body);
                 console.log("Incoming call from:", invite.from, "room:", invite.room);
-                // Показываем диалог
+                // Показываем диалог (можно свой UI, сейчас confirm)
                 let ok = confirm(`User ${invite.from} invites you to a call. Accept?`);
                 if (ok) {
                     initJitsi(invite.room);
                 }
             });
 
-            // Подписка на общий чат
+            // Общий чат
             stompClient.subscribe("/topic/messages", msg => {
                 let chatMsg = JSON.parse(msg.body);
-                addMessageToUI(chatMsg.username, chatMsg.text);
+                addMessageToChat(chatMsg.username, chatMsg.text);
             });
 
         }, err => {
@@ -167,7 +194,77 @@
         });
     }
 
-    // Отправка сообщения (чат)
+    // Функции для комнат (RoomController)
+    async function loadRooms() {
+        try {
+            let resp = await fetch("/api/rooms");
+            let rooms = await resp.json();
+            const roomListDiv = document.getElementById('roomList');
+            roomListDiv.innerHTML = "";
+            rooms.forEach(r => {
+                roomListDiv.innerHTML += `
+                  <div>
+                    ${r}
+                    <button class="btn btn-sm btn-success" onclick="joinRoom('${r}')">Join</button>
+                  </div>
+                `;
+            });
+        } catch (err) {
+            console.error("Failed to load rooms:", err);
+        }
+    }
+
+    async function createRoom() {
+        const input = document.getElementById('roomNameInput');
+        const roomName = input.value.trim();
+        if (!roomName) return;
+        try {
+            await fetch("/api/rooms?name=" + encodeURIComponent(roomName), {
+                method: "POST"
+            });
+            input.value = "";
+            loadRooms();
+        } catch (err) {
+            console.error("Failed to create room:", err);
+        }
+    }
+
+    function joinRoom(roomName) {
+        initJitsi(roomName);
+    }
+
+    // Список пользователей онлайн
+    function updateUserList(users) {
+        let userListDiv = document.getElementById('userList');
+        if (!userListDiv) return;
+        userListDiv.innerHTML = '';
+
+        users.forEach(u => {
+            if (u === currentUser) {
+                userListDiv.innerHTML += `<div>${u} (me)</div>`;
+            } else {
+                userListDiv.innerHTML += `<div>${u}
+                    <button class="btn btn-sm btn-primary" onclick="callUser('${u}')">Call</button>
+                </div>`;
+            }
+        });
+    }
+
+    // Нажатие кнопки "Call" (1-на-1)
+    function callUser(targetUser) {
+        // Генерируем комнату
+        const roomName = "CallRoom_" + Date.now();
+        // Шлём invite
+        stompClient.send("/app/call.invite", {}, JSON.stringify({
+            from: currentUser,
+            to: targetUser,
+            room: roomName
+        }));
+        // И сами заходим в эту комнату
+        initJitsi(roomName);
+    }
+
+    // Чат
     function sendChatMessage() {
         if (!stompClient) return;
         const input = document.getElementById('messageInput');
@@ -181,52 +278,26 @@
         input.value = "";
     }
 
-    // Отобразить сообщение чата
-    function addMessageToUI(user, text) {
-        let list = document.getElementById('messageList');
+    function addMessageToChat(username, text) {
+        const list = document.getElementById('messageList');
         if (!list) return;
-        let div = document.createElement('div');
+        const div = document.createElement('div');
         div.classList.add('message');
-        div.innerHTML = `<strong>${user}:</strong> ${text}`;
+        div.innerHTML = `<strong>${username}:</strong> ${text}`;
         list.appendChild(div);
         list.scrollTop = list.scrollHeight;
     }
 
-    // Обновляем список онлайн-пользователей
-    function updateUserList(users) {
-        let userListDiv = document.getElementById('userList');
-        if (!userListDiv) return;
-        userListDiv.innerHTML = '';
-
-        users.forEach(u => {
-            if (u === currentUser) {
-                userListDiv.innerHTML += `<div>${u} (me)</div>`;
-            } else {
-                userListDiv.innerHTML += `<div>${u}
-                    <button onclick="callUser('${u}')">Call</button>
-                </div>`;
-            }
-        });
-    }
-
-    // Нажатие "Call" напротив пользователя
-    function callUser(targetUser) {
-        const roomName = "CallRoom_" + Date.now();
-        stompClient.send("/app/call.invite", {}, JSON.stringify({
-            from: currentUser,
-            to: targetUser,
-            room: roomName
-        }));
-        // И мы сами заходим в эту комнату
-        initJitsi(roomName);
-    }
-
-    // Инициализация Jitsi (с отключением Google-логина/«Are you host?», убираем лого)
+    // Инициализация Jitsi (отключаем "Are you host?", Google-логин, пр.)
     function initJitsi(roomName) {
-        if (!roomName) roomName = "Room_" + Date.now();
-        if (jitsiApi) jitsiApi.dispose();
+        if (!roomName) {
+            roomName = "Room_" + Date.now();
+        }
+        if (jitsiApi) {
+            jitsiApi.dispose();
+        }
 
-        const domain = "meet.jit.si";
+        const domain = "meet.jit.si"; // публичный сервер
         const options = {
             roomName: roomName,
             parentNode: document.getElementById('jitsiContainer'),
@@ -234,25 +305,28 @@
             height: '600px',
             userInfo: { displayName: currentUser },
 
-            // Отключаем сторонние запросы (Google Drive, Dropbox и пр.)
             configOverwrite: {
-                disableThirdPartyRequests: true
+                disableThirdPartyRequests: true,
+                prejoinPageEnabled: false,
+                disableDeepLinking: true,
+                enableLobbyChat: false,
+                enableUserRolesBasedOnToken: false
             },
-
-            // Убираем лого, баннеры, кнопки записи/стрима.
-            // Можно дополнительно кастомизировать набор TOOLBAR_BUTTONS.
             interfaceConfigOverwrite: {
                 SHOW_JITSI_WATERMARK: false,
                 SHOW_BRAND_WATERMARK: false,
                 SHOW_POWERED_BY: false,
                 HIDE_DEEP_LINKING_LOGO: true,
-                // Минимально оставим только базовые кнопки
+                MOBILE_APP_PROMO: false,
+                // Уберём лишние кнопки (запись, стрим)
                 TOOLBAR_BUTTONS: [
-                    'microphone','camera','desktop','fullscreen',
-                    'fodeviceselection','hangup','chat','settings'
+                    'microphone','camera','desktop',
+                    'fullscreen','fodeviceselection','hangup',
+                    'chat','settings'
                 ]
             }
         };
+
         jitsiApi = new JitsiMeetExternalAPI(domain, options);
         console.log("Jitsi started in room:", roomName);
     }
@@ -260,3 +334,4 @@
 
 </body>
 </html>
+

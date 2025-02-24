@@ -145,17 +145,51 @@ function callUser(targetUser) {
  * Инициализация Jitsi
  */
 function initJitsi(roomName) {
+    // Если roomName не передали, генерируем
     if (!roomName) roomName = "Room_" + Date.now();
-    if (jitsiApi) jitsiApi.dispose();
+
+    // Если уже есть открыт Jitsi, "сносим" его
+    if (jitsiApi) {
+        jitsiApi.dispose();
+    }
 
     const domain = "meet.jit.si";
     const options = {
         roomName: roomName,
         parentNode: document.getElementById('jitsiContainer'),
         width: '100%',
-        height: '400px',
-        userInfo: { displayName: currentUser }
+        height: '600px', // Или 400px, как удобнее
+        userInfo: { displayName: currentUser },
+
+        // ВАЖНО: отключаем сторонние запросы (Google Drive и т.д.)
+        configOverwrite: {
+            disableThirdPartyRequests: true,
+            // Убираем пред-join пэйдж
+            prejoinPageEnabled: false,
+            // Не предлагаем открыть мобильное приложение
+            disableDeepLinking: true,
+            // Дополнительно отключаем "lobby" и "Are you the host?"
+            enableLobbyChat: false,
+            enableUserRolesBasedOnToken: false
+        },
+        interfaceConfigOverwrite: {
+            // Убираем логотипы и "powered by"
+            SHOW_JITSI_WATERMARK: false,
+            SHOW_BRAND_WATERMARK: false,
+            SHOW_POWERED_BY: false,
+            HIDE_DEEP_LINKING_LOGO: true,
+            MOBILE_APP_PROMO: false,
+
+            // Минимально нужные кнопки
+            TOOLBAR_BUTTONS: [
+                'microphone','camera','desktop','fullscreen',
+                'fodeviceselection','hangup','chat','settings'
+            ]
+        }
     };
+
+    // Создаём «встроенную» конфу Jitsi
     jitsiApi = new JitsiMeetExternalAPI(domain, options);
+
     console.log("Jitsi started in room:", roomName);
 }
