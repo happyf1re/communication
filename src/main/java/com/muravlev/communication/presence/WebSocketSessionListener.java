@@ -24,6 +24,8 @@ public class WebSocketSessionListener {
         StompHeaderAccessor sha = StompHeaderAccessor.wrap(event.getMessage());
         // Берём username из заголовка CONNECT (login), если нет - генерим
         String username = sha.getLogin();
+        System.out.println(">>> SessionConnectEvent: login=" + username
+                + " sessionId=" + sha.getSessionId());
         if (username == null || username.isEmpty()) {
             username = "Anon-" + sha.getSessionId();
         }
@@ -38,6 +40,7 @@ public class WebSocketSessionListener {
     @EventListener
     public void handleSessionDisconnect(SessionDisconnectEvent event) {
         StompHeaderAccessor sha = StompHeaderAccessor.wrap(event.getMessage());
+        System.out.println(">>> SessionDisconnectEvent: sessionId=" + sha.getSessionId());
 
         // Удаляем запись
         presenceService.userDisconnected(sha.getSessionId());

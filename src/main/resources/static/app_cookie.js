@@ -64,7 +64,7 @@ function connectWebSocket() {
         // Подписываемся на личные приглашения
         stompClient.subscribe("/user/queue/callInvites", msg => {
             let invite = JSON.parse(msg.body);
-            console.log("Call invite from:", invite.from, "for room:", invite.room);
+            console.log("[STOMP] Incoming call:", invite);
             let ok = confirm(`User ${invite.from} invites you to a call. Accept?`);
             if (ok) {
                 initJitsi(invite.room);
@@ -74,6 +74,7 @@ function connectWebSocket() {
         // Подписка на общий чат
         stompClient.subscribe("/topic/messages", msg => {
             let chatMsg = JSON.parse(msg.body);
+            console.log("[STOMP] /topic/messages =>", chatMsg);
             addMessageToUI(chatMsg.username, chatMsg.text);
         });
 
@@ -115,6 +116,7 @@ function addMessageToUI(user, text) {
  * Обновляем список онлайн-пользователей
  */
 function updateUserList(users) {
+    console.log("[UPDATE] userList =>", users);
     let userListDiv = document.getElementById('userList');
     if (!userListDiv) return;
     userListDiv.innerHTML = '';
@@ -132,6 +134,7 @@ function updateUserList(users) {
 
 function callUser(targetUser) {
     const roomName = "Room_" + Date.now();
+    console.log("[CALL] callUser => from:", currentUser, "to:", targetUser, "room:", roomName);
     stompClient.send("/app/call.invite", {}, JSON.stringify({
         from: currentUser,
         to: targetUser,
@@ -145,6 +148,7 @@ function callUser(targetUser) {
  * Инициализация Jitsi
  */
 function initJitsi(roomName) {
+    console.log("[JITSI] init => room:", roomName);
     // Если roomName не передали, генерируем
     if (!roomName) roomName = "Room_" + Date.now();
 
@@ -191,5 +195,5 @@ function initJitsi(roomName) {
     // Создаём «встроенную» конфу Jitsi
     jitsiApi = new JitsiMeetExternalAPI(domain, options);
 
-    console.log("Jitsi started in room:", roomName);
+    console.log("[JITSI] Started in room:", roomName);
 }

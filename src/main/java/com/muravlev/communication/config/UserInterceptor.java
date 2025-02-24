@@ -18,25 +18,22 @@ public class UserInterceptor implements ChannelInterceptor {
         StompHeaderAccessor sha = StompHeaderAccessor.wrap(message);
 
         if (StompCommand.CONNECT.equals(sha.getCommand())) {
-
             String login = sha.getLogin();
             if (login == null || login.isEmpty()) {
                 login = "anon-" + sha.getSessionId();
             }
-
-            // Лог для проверки
             System.out.println(">>>>> CONNECT: login=" + login + " sessionId=" + sha.getSessionId());
 
             StompPrincipal principal = new StompPrincipal(login);
 
-            // Ставим Principal
             sha.setUser(principal);
-
-            // ВАЖНО: делаем аксессор «mutable» прежде чем вернуть
             sha.setLeaveMutable(true);
 
-            // Создаём новое сообщение, у которого в заголовках уже user = principal
             return MessageBuilder.createMessage(message.getPayload(), sha.getMessageHeaders());
+        }
+
+        if (StompCommand.SEND.equals(sha.getCommand())) {
+            System.out.println(">>>>> SEND from " + sha.getUser() + " to destination=" + sha.getDestination());
         }
 
         return message;

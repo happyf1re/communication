@@ -17,10 +17,9 @@ public class CallController {
 
     @MessageMapping("/call.invite") // => "/app/call.invite"
     public void inviteUser(CallInvite invite) {
-        // invite = { from: "...", to: "...", room: "..." }
-        // Отправляем личное сообщение пользователю invite.to
-        // => /user/{invite.to}/queue/callInvites
-        System.out.println("call.invite from=" + invite.getFrom() + " to=" + invite.getTo() + " room=" + invite.getRoom());
+        System.out.println(">>> Sending message to /user/" + invite.getTo() + "/queue/callInvites");
+
+
         messagingTemplate.convertAndSendToUser(
                 invite.getTo(),
                 "/queue/callInvites",
