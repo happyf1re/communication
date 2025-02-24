@@ -32,6 +32,7 @@ public class CallController {
         private String from; // инициатор
         private String to;   // кого вызываем
         private String room; // название комнаты (уникальное)
+
     }
 }
 
