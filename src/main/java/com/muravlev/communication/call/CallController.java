@@ -7,7 +7,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 /**
- * Контроллер для логики вызовов (vсall.invite).
+ * Контроллер для логики вызовов (видеозвонок 1-на-1).
  */
 @Controller
 public class CallController {
@@ -31,13 +31,10 @@ public class CallController {
     public static class CallInvite {
         private String from; // инициатор
         private String to;   // кого вызываем
-        private String room; // название комнаты
+        private String room; // название комнаты (уникальное)
     }
-
-    //192.168.0.185
-
-
 }
+
 
 
 
