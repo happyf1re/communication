@@ -77,5 +77,46 @@ public class ProjectController {
         projectRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
+
+    // Дополнительный метод: добавить участника
+    @PostMapping("/{projectId}/addParticipant/{employeeId}")
+    public ResponseEntity<?> addParticipant(@PathVariable Long projectId,
+                                            @PathVariable Long employeeId) {
+        var projOpt = projectRepository.findById(projectId);
+        if (projOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        var empOpt = employeeRepository.findById(employeeId);
+        if (empOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body("Employee not found: " + employeeId);
+        }
+
+        Project project = projOpt.get();
+        project.getParticipants().add(empOpt.get());
+        projectRepository.save(project);
+
+        return ResponseEntity.ok(project);
+    }
+
+    // Удалить участника
+    @PostMapping("/{projectId}/removeParticipant/{employeeId}")
+    public ResponseEntity<?> removeParticipant(@PathVariable Long projectId,
+                                               @PathVariable Long employeeId) {
+        var projOpt = projectRepository.findById(projectId);
+        if (projOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        Project project = projOpt.get();
+
+        var empOpt = employeeRepository.findById(employeeId);
+        if (empOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body("Employee not found: " + employeeId);
+        }
+
+        project.getParticipants().remove(empOpt.get());
+        projectRepository.save(project);
+
+        return ResponseEntity.ok(project);
+    }
 }
 

@@ -1,5 +1,6 @@
 package com.muravlev.communication.projects;
 
+import com.muravlev.communication.employee.Employee;
 import com.muravlev.communication.employee.EmployeeRepository;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -26,17 +27,29 @@ public class TaskController {
 
     @PostMapping("/create")
     public ResponseEntity<?> createTask(@RequestParam Long projectId, @Valid @RequestBody Task task) {
-        // Проверяем проект
         Optional<Project> projectOpt = projectRepository.findById(projectId);
         if (projectOpt.isEmpty()) {
             return ResponseEntity.badRequest().body("Project not found: " + projectId);
         }
-        // Проверяем assignee
+        Project project = projectOpt.get();
+
+        // Проверим assignee
         if (!employeeRepository.existsByUsername(task.getAssigneeUsername())) {
             return ResponseEntity.badRequest().body("Assignee user not found: " + task.getAssigneeUsername());
         }
 
-        task.setProject(projectOpt.get());
+        // Новая проверка: assigneeUsername => действительно ли он участник проекта?
+        // 1) находим Employee
+        Employee assignee = employeeRepository.findByUsername(task.getAssigneeUsername()).get(); // safe, we just existBy
+        // 2) проверяем, что project.participants.contains(assignee)
+        if (!project.getParticipants().contains(assignee)) {
+            return ResponseEntity.badRequest()
+                    .body("User " + assignee.getUsername() + " is not a participant of project " + projectId);
+        }
+
+        // Ок, ставим проект
+        task.setProject(project);
+
         Task saved = taskRepository.save(task);
         return ResponseEntity.ok(saved);
     }
