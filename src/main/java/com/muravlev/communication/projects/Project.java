@@ -1,6 +1,8 @@
 package com.muravlev.communication.projects;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -13,16 +15,26 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class Project {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
-    private String managerUsername; // Связка с Employee.username
+    @NotBlank
+    private String name;  // Название проекта
+
+    // Логин менеджера (должен существовать в Employee)
+    @NotBlank
+    private String managerUsername;
 
     private LocalDate startDate;
     private LocalDate endDate;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     private ProjectStatus status;
+
+    // Можно добавить описание
+    private String description;
 }
+

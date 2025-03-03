@@ -1,6 +1,8 @@
 package com.muravlev.communication.projects;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -13,20 +15,31 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class Task {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Связь со "старым" проектом
+    // Связь c проектом
     @ManyToOne
     @JoinColumn(name = "project_id")
     private Project project;
 
+    @NotBlank
     private String title;
-    private String assigneeUsername; // Тоже связка по строке
+
+    @NotBlank
+    private String assigneeUsername; // Логин исполнителя
+
     private LocalDate dueDate;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     private TaskStatus status;
+
     private String description;
+
+    // Учёт затраченного времени (в минутах)
+    private int timeSpentMinutes;
 }
+

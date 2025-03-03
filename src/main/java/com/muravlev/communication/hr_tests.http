@@ -1,0 +1,76 @@
+### --- TEAMS ---
+
+### 1) Создать команду
+POST http://localhost:8080/api/teams
+Content-Type: application/json
+
+{
+  "name": "Super Team",
+  "managerUsername": "alex",
+  "members": []
+}
+
+### 2) Список всех команд
+GET http://localhost:8080/api/teams
+
+### 3) Добавить участника (employeeId=1) в команду (id=1)
+POST http://localhost:8080/api/teams/1/addMember/1
+
+### 4) Удалить участника (employeeId=1) из команды (id=1)
+POST http://localhost:8080/api/teams/1/removeMember/1
+
+### 5) Обновить команду
+PUT http://localhost:8080/api/teams/1
+Content-Type: application/json
+
+{
+  "name": "Super Team (updated)",
+  "managerUsername": "john",
+  "members": []
+}
+
+### 6) Удалить команду
+DELETE http://localhost:8080/api/teams/2
+
+
+### --- VACATIONS ---
+
+### 1) Создать отпуск
+POST http://localhost:8080/api/vacations
+Content-Type: application/json
+
+{
+  "employee": {
+    "id": 1
+  },
+  "startDate": "2025-07-01",
+  "endDate": "2025-07-14",
+  "status": "REQUESTED",
+  "comment": "Summer vacation"
+}
+
+### 2) Список всех отпусков
+GET http://localhost:8080/api/vacations
+
+### 3) Получить отпуск по id=1
+GET http://localhost:8080/api/vacations/1
+
+### 4) Обновить отпуск (id=1)
+PUT http://localhost:8080/api/vacations/1
+Content-Type: application/json
+
+{
+  "employee": {
+    "id": 1
+  },
+  "startDate": "2025-07-01",
+  "endDate": "2025-07-10",
+  "status": "APPROVED",
+  "comment": "Shortened a bit"
+}
+
+### 5) Удалить отпуск
+DELETE http://localhost:8080/api/vacations/5
+
+### 6) Список отпусков конкретного сотрудника (employeeId=1)
+GET http://localhost:8080/api/vacations/byEmployee/1

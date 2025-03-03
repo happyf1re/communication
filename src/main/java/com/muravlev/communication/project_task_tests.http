@@ -1,41 +1,212 @@
-### Создать проект
+
+
+### 1) Создать сотрудника: "dima"
+POST http://localhost:8080/api/employees
+Content-Type: application/json
+
+{
+  "username": "dima",
+  "password": "dima123",
+  "firstName": "Dmitry",
+  "lastName": "Muravlev",
+  "department": "IT",
+  "role": "EMPLOYEE"
+}
+
+### 2) Создать сотрудника: "alex"
+POST http://localhost:8080/api/employees
+Content-Type: application/json
+
+{
+  "username": "alex",
+  "password": "alex123",
+  "firstName": "Alexey",
+  "lastName": "Petrov",
+  "department": "Finance",
+  "role": "MANAGER"
+}
+
+### 3) Создать сотрудника: "john"
+POST http://localhost:8080/api/employees
+Content-Type: application/json
+
+{
+  "username": "john",
+  "password": "john123",
+  "firstName": "John",
+  "lastName": "Smith",
+  "department": "HR",
+  "role": "EMPLOYEE"
+}
+
+### 4) Создать сотрудника: "ann"
+POST http://localhost:8080/api/employees
+Content-Type: application/json
+
+{
+  "username": "ann",
+  "password": "ann123",
+  "firstName": "Anna",
+  "lastName": "Danova",
+  "department": "Marketing",
+  "role": "EMPLOYEE"
+}
+
+### 5) Создать сотрудника: "admin"
+POST http://localhost:8080/api/employees
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123",
+  "firstName": "Super",
+  "lastName": "Admin",
+  "department": "IT",
+  "role": "ADMIN"
+}
+
+### Проверка: список сотрудников
+GET http://localhost:8080/api/employees
+
+### Получить сотрудника по ID=1
+GET http://localhost:8080/api/employees/1
+
+### Получить сотрудника по username
+GET http://localhost:8080/api/employees/byUsername/dima
+
+### Обновить сотрудника (ID=1)
+PUT http://localhost:8080/api/employees/1
+Content-Type: application/json
+
+{
+  "username": "dima",
+  "password": "pass",
+  "firstName": "Dmitry",
+  "lastName": "Muravlev",
+  "department": "IT",
+  "role": "MANAGER"
+}
+
+### Удалить сотрудника
+DELETE http://localhost:8080/api/employees/2
+
+
+
+
+
+
+### 1. Создать проект
 POST http://localhost:8080/api/projects
 Content-Type: application/json
 
 {
-  "name": "My Big Project",
-  "managerUsername": "boss123",
-  "startDate": "2025-05-01",
-  "endDate": "2025-10-01",
-  "status": "PLANNED"
+  "name": "My Awesome Project",
+  "managerUsername": "managerUser",
+  "startDate": "2025-03-01",
+  "endDate": "2025-06-01",
+  "status": "PLANNED",
+  "description": "This is a demo project"
 }
 
-### Список проектов
+### 2. Список всех проектов
 GET http://localhost:8080/api/projects
 
-### Создать задачу
+### 3. Получить проект по id
+GET http://localhost:8080/api/projects/1
+
+### 4. Обновить проект
+PUT http://localhost:8080/api/projects/1
+Content-Type: application/json
+
+{
+  "name": "My Awesome Project (updated)",
+  "managerUsername": "john_doe",
+  "startDate": "2025-04-01",
+  "endDate": "2025-08-01",
+  "status": "ACTIVE",
+  "description": "We changed the manager"
+}
+
+### 5. Удалить проект
+DELETE http://localhost:8080/api/projects/2
+
+
+
+
+### 6. Создать задачу (привязка к проекту id=1)
 POST http://localhost:8080/api/tasks/create?projectId=1
 Content-Type: application/json
 
 {
-  "title": "Implement Feature X",
+  "title": "Design UI mockups",
   "assigneeUsername": "dima",
-  "dueDate": "2025-06-01",
+  "dueDate": "2025-05-15",
   "status": "NEW",
-  "description": "Some details..."
+  "description": "Drafting wireframes and style guides",
+  "timeSpentMinutes": 0
 }
 
-### Список задач
+### 7. Список всех задач
 GET http://localhost:8080/api/tasks
 
-### Обновить задачу
-PUT http://localhost:8080/api/tasks/2
+### 8. Получить задачу id=1
+GET http://localhost:8080/api/tasks/1
+
+### 9. Обновить задачу
+PUT http://localhost:8080/api/tasks/1
 Content-Type: application/json
 
 {
-  "title": "Implement Feature X (updated)",
+  "project": {
+    "id": 1
+  },
+  "title": "Design UI mockups (updated)",
   "assigneeUsername": "dima",
-  "dueDate": "2025-06-15",
+  "dueDate": "2025-05-20",
   "status": "IN_PROGRESS",
-  "description": "We started dev"
+  "description": "We started implementing them in Figma",
+  "timeSpentMinutes": 60
 }
+
+### 10. Удалить задачу id=5
+DELETE http://localhost:8080/api/tasks/5
+
+
+### 11. Список задач проекта id=1
+GET http://localhost:8080/api/tasks/byProject/1
+
+### 12. Список задач сотрудника “dima”
+GET http://localhost:8080/api/tasks/byAssignee/dima
+
+
+### --- COMMENTS ---
+
+### 13. Добавить комментарий к задаче id=1
+POST http://localhost:8080/api/tasks/1/comments
+Content-Type: application/json
+
+{
+  "authorUsername": "alex",
+  "text": "We need more details, let's schedule a call"
+}
+
+### 14. Получить все комментарии задачи id=1
+GET http://localhost:8080/api/tasks/1/comments
+
+### 15. Получить конкретный комментарий
+GET http://localhost:8080/api/tasks/1/comments/1
+
+### 16. Удалить комментарий
+DELETE http://localhost:8080/api/tasks/1/comments/2
+
+
+### --- REPORTS ---
+
+### 17. Просроченные задачи (dueDate < today, status != DONE)
+GET http://localhost:8080/api/reports/overdueTasks
+
+### 18. Проекты, заканчивающиеся в течение 7 дней (status != COMPLETED)
+GET http://localhost:8080/api/reports/endingSoonProjects
+
+### 19. Количество задач по assignee
+GET http://localhost:8080/api/reports/tasksByAssigneeCount
