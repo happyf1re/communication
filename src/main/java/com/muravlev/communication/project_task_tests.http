@@ -1,0 +1,41 @@
+### Создать проект
+POST http://localhost:8080/api/projects
+Content-Type: application/json
+
+{
+  "name": "My Big Project",
+  "managerUsername": "boss123",
+  "startDate": "2025-05-01",
+  "endDate": "2025-10-01",
+  "status": "PLANNED"
+}
+
+### Список проектов
+GET http://localhost:8080/api/projects
+
+### Создать задачу
+POST http://localhost:8080/api/tasks/create?projectId=1
+Content-Type: application/json
+
+{
+  "title": "Implement Feature X",
+  "assigneeUsername": "dima",
+  "dueDate": "2025-06-01",
+  "status": "NEW",
+  "description": "Some details..."
+}
+
+### Список задач
+GET http://localhost:8080/api/tasks
+
+### Обновить задачу
+PUT http://localhost:8080/api/tasks/2
+Content-Type: application/json
+
+{
+  "title": "Implement Feature X (updated)",
+  "assigneeUsername": "dima",
+  "dueDate": "2025-06-15",
+  "status": "IN_PROGRESS",
+  "description": "We started dev"
+}
