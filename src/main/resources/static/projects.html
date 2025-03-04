@@ -17,7 +17,6 @@
       padding: 10px;
       margin-bottom: 10px;
     }
-    /* Дополнительные стили для вкладки деталей */
     .detailsBox {
       margin-top: 10px;
       padding: 10px;
@@ -27,6 +26,17 @@
       border: 1px solid #666;
       margin: 5px;
       padding: 5px;
+    }
+    /* Для комментариев */
+    .commentsBox {
+      margin-left: 20px;
+      border: 1px solid #666;
+      padding: 8px;
+      margin-top: 5px;
+    }
+    .commentItem {
+      border-bottom: 1px dashed #777;
+      padding: 4px 0;
     }
   </style>
 </head>
@@ -51,17 +61,14 @@
 <div class="container">
   <h2>Projects Management</h2>
 
-  <!-- Кнопка загрузки списка -->
-  <button class="btn btn-sm btn-primary mb-3" id="btnLoadProjects">
-    Load Projects
-  </button>
+  <button class="btn btn-sm btn-primary mb-3" id="btnLoadProjects">Load Projects</button>
 
-  <!-- Форма (создание/редактирование) -- та же самая, что и раньше -->
+  <!-- Форма создания/редактирования проекта (не меняется) -->
   <div class="card bg-secondary mb-4" style="max-width: 500px;">
     <div class="card-body">
       <h5 class="card-title" id="formTitle">Create Project</h5>
       <form id="projectForm">
-        <!-- поля name, managerUsername, status, startDate, endDate, description... -->
+        <!-- ... поля name, managerUsername, status, startDate, endDate, description ... -->
         <div class="mb-2">
           <label for="projectName" class="form-label">Project Name *</label>
           <input type="text" class="form-control" id="projectName" required>
