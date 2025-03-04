@@ -414,6 +414,7 @@ async function addComment(taskId) {
     } catch(err) {
         alert(err.message);
     }
+
 }
 
 
