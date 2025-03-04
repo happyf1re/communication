@@ -41,6 +41,16 @@
         <input type="text" class="form-control" id="lastName"/>
     </div>
 
+    <!-- Новое поле для role: select с тремя вариантами -->
+    <div class="mb-3">
+        <label for="role" class="form-label">Role</label>
+        <select class="form-select" id="role">
+            <option value="EMPLOYEE">EMPLOYEE</option>
+            <option value="MANAGER">MANAGER</option>
+            <option value="ADMIN">ADMIN</option>
+        </select>
+    </div>
+
     <button id="registerBtn" class="btn btn-primary">Register</button>
     <a href="/login.html" class="btn btn-link">Login</a>
 </div>
@@ -56,6 +66,7 @@
         const department = document.getElementById('department').value.trim();
         const firstName = document.getElementById('firstName').value.trim();
         const lastName = document.getElementById('lastName').value.trim();
+        const role = document.getElementById('role').value; // <-- берём значение из select
 
         if (!username || !password) {
             alert("Username and password are required!");
@@ -67,25 +78,30 @@
             password,
             department,
             firstName,
-            lastName
+            lastName,
+            role  // Важно: передаём role
         };
 
-        // Регистрируем (обычный POST /api/employees/register)
+        // Допустим, бэк принимает POST /api/employees/register
         const resp = await fetch("/api/employees/register", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
         });
+
         if (resp.ok) {
             alert("Registration successful! Now logging in...");
             // После регистрации — логинимся (через cookie)
-            loginAfterRegister(username, password);
+            await loginAfterRegister(username, password);
         } else {
-            alert("Failed to register user (maybe username taken)");
+            // Показываем ошибку
+            const text = await resp.text();
+            alert("Failed to register user:\n" + text);
         }
     }
 
     async function loginAfterRegister(username, password) {
+        // Ваш логин-эндпоинт (cookie-based)
         const resp = await fetch("/api/employees/cookie/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },

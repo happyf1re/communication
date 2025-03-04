@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Vacations - DemoApp</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
+    <style>
+        body {
+            background-color: #212529;
+            color: #f8f9fa;
+        }
+        a, a.nav-link { color: #f8f9fa; }
+        .container { margin-top: 20px; }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/index.html">DemoApp</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" href="/rooms.html">Rooms</a></li>
+                <li class="nav-item"><a class="nav-link" href="/chat.html">Chat</a></li>
+                <li class="nav-item"><a class="nav-link" href="/projects.html">Projects</a></li>
+                <li class="nav-item"><a class="nav-link" href="/teams.html">Teams</a></li>
+                <li class="nav-item"><a class="nav-link active" href="/vacations.html">Vacations</a></li>
+            </ul>
+            <button class="btn btn-outline-light" id="logoutBtn">Logout</button>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <h2>Vacations</h2>
+    <button class="btn btn-sm btn-primary" id="btnLoadVacations">Load Vacations</button>
+    <button class="btn btn-sm btn-success" id="btnNewVacation">New Vacation</button>
+
+    <div id="vacationsList" class="mt-3"></div>
+
+    <hr/>
+    <h4>Create/Edit Vacation</h4>
+    <div class="mb-2">
+        <label>Employee ID:</label>
+        <input type="number" id="vacEmpId" class="form-control"/>
+    </div>
+    <div class="mb-2">
+        <label>Start Date:</label>
+        <input type="date" id="vacStart" class="form-control"/>
+    </div>
+    <div class="mb-2">
+        <label>End Date:</label>
+        <input type="date" id="vacEnd" class="form-control"/>
+    </div>
+    <div class="mb-2">
+        <label>Status:</label>
+        <select id="vacStatus" class="form-select">
+            <option>REQUESTED</option>
+            <option>APPROVED</option>
+            <option>REJECTED</option>
+            <option>CANCELLED</option>
+        </select>
+    </div>
+    <div class="mb-2">
+        <label>Comment:</label>
+        <input type="text" id="vacComment" class="form-control"/>
+    </div>
+    <button class="btn btn-sm btn-warning" id="saveVacationBtn">Save</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/common.js"></script>
+<script src="/js/vacations.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            await whoAmI();
+        } catch(e){
+            window.location.href="/login.html";
+        }
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+    });
+</script>
+</body>
+</html>

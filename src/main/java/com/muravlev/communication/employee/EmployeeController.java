@@ -12,9 +12,11 @@ import java.util.List;
 public class EmployeeController {
 
     private final EmployeeRepository employeeRepository;
+    private final EmployeeService employeeService;
 
-    public EmployeeController(EmployeeRepository employeeRepository) {
+    public EmployeeController(EmployeeRepository employeeRepository, EmployeeService employeeService) {
         this.employeeRepository = employeeRepository;
+        this.employeeService = employeeService;
     }
 
     // Создать сотрудника
@@ -26,6 +28,18 @@ public class EmployeeController {
                     .body("Username already taken: " + employee.getUsername());
         }
         Employee saved = employeeRepository.save(employee);
+        return ResponseEntity.ok(saved);
+    }
+
+    /**
+     * @POST /api/employees/register -- «Специальный» эндпоинт для регистрации
+     *    чтобы соответствовать фронту, который шлёт POST /api/employees/register
+     */
+    @PostMapping("/register")
+    public ResponseEntity<Employee> registerEmployee(@RequestBody Employee e) {
+        // Если ничем не отличается от createEmployee,
+        // можно тоже вызывать service.register(e)
+        Employee saved = employeeService.register(e);
         return ResponseEntity.ok(saved);
     }
 

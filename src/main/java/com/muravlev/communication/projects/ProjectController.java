@@ -24,8 +24,9 @@ public class ProjectController {
     @PostMapping
     public ResponseEntity<?> createProject(@Valid @RequestBody Project project) {
         // Проверим, что manager существует
-        if (employeeRepository.existsByUsername(project.getManagerUsername())) {
-            return ResponseEntity.badRequest().body("Manager user not found: " + project.getManagerUsername());
+        if (!employeeRepository.existsByUsername(project.getManagerUsername())) {
+            return ResponseEntity.badRequest()
+                    .body("Manager user not found: " + project.getManagerUsername());
         }
         Project saved = projectRepository.save(project);
         return ResponseEntity.ok(saved);
