@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
         loadRooms();
     }).catch(err => {
         console.error(err);
+        // не залогинен => логин
+        window.location.href = "/login.html";
     });
 });
 
@@ -24,10 +26,10 @@ async function loadRooms() {
             let div = document.createElement('div');
             div.className = 'mb-2';
             div.innerHTML = `
-        <span>${r}</span>
-        <button class="btn btn-sm btn-success" onclick="joinRoom('${r}')">Join</button>
-        <button class="btn btn-sm btn-danger" onclick="deleteRoom('${r}')">Delete</button>
-      `;
+                <span>${r}</span>
+                <button class="btn btn-sm btn-success" onclick="joinRoom('${r}')">Join</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteRoom('${r}')">Delete</button>
+            `;
             listDiv.appendChild(div);
         });
     } catch(err) {
@@ -59,10 +61,14 @@ async function deleteRoom(name) {
 }
 
 function joinRoom(roomName) {
+    // Если уже была инициализирована jitsiApi, убираем
     if (jitsiApi) {
         jitsiApi.dispose();
     }
+
+
     const domain = "meet.jit.si";
+
     const options = {
         roomName: roomName,
         parentNode: document.getElementById('jitsiContainer'),
@@ -72,7 +78,7 @@ function joinRoom(roomName) {
         configOverwrite: {
             disableThirdPartyRequests: true,
             prejoinPageEnabled: false,
-            disableDeepLinking: true
+            disableDeepLinking: true,
         },
         interfaceConfigOverwrite: {
             SHOW_JITSI_WATERMARK: false,

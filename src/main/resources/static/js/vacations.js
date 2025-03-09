@@ -1,3 +1,4 @@
+//vacations.js
 let editingVacationId = null;
 
 document.addEventListener('DOMContentLoaded', () => {

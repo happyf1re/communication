@@ -1,3 +1,5 @@
+//teams.js
+
 let editingTeamId = null;
 
 document.addEventListener('DOMContentLoaded', () => {

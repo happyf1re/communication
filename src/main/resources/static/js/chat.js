@@ -5,14 +5,13 @@ let currentUser = null;
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('sendBtn').addEventListener('click', sendChat);
 
-    // 1) Who am I
+    // 1) Узнаём, кто залогинен
     whoAmI().then(user => {
         currentUser = user;
-        // 2) Connect STOMP
         connectStomp();
     }).catch(err => {
         console.error(err);
-        // редирект на логин
+        // если не залогинен — на login
         window.location.href = "/login.html";
     });
 });
@@ -20,24 +19,27 @@ document.addEventListener('DOMContentLoaded', () => {
 function connectStomp() {
     const socket = new SockJS('/ws');
     stompClient = Stomp.over(socket);
-    // Disable debug log for clarity
+    // Отключим подробный лог в консоль:
     stompClient.debug = null;
 
-    // Передаём login=currentUser (у вас в UserInterceptor прописано).
+    // Передаём login=currentUser (используется в UserInterceptor на бэке).
     stompClient.connect({ login: currentUser }, frame => {
         console.log("STOMP connected", frame);
 
-        // 1) Подписка на общие сообщения
+        // 1) Подписка на общие чат-сообщения
         stompClient.subscribe('/topic/messages', msg => {
             const body = JSON.parse(msg.body);
             addMessage(body.username, body.text);
         });
 
-        // 2) Подписка на список онлайн-пользователей
+        // 2) Подписка на список (username+status) пользователей
         stompClient.subscribe('/topic/onlineUsers', msg => {
-            const users = JSON.parse(msg.body);
-            updateOnlineUsers(users);
+            const list = JSON.parse(msg.body);
+            updateOnlineUsers(list);
         });
+
+        // 3) Сразу же запрашиваем актуальный список онлайн
+        stompClient.send('/app/presence.getOnlineUsers', {}, {});
 
     }, err => {
         console.error("STOMP error:", err);
@@ -49,6 +51,7 @@ function sendChat() {
     const input = document.getElementById('messageInput');
     const txt = input.value.trim();
     if (!txt) return;
+
     stompClient.send('/app/chat.send', {}, JSON.stringify({
         username: currentUser,
         text: txt
@@ -65,18 +68,21 @@ function addMessage(user, text) {
     list.scrollTop = list.scrollHeight;
 }
 
-// Функция для обновления списка онлайн
+// Обновлённая функция: usersArray — массив объектов { username, status }
 function updateOnlineUsers(usersArray) {
     const div = document.getElementById('onlineUsers');
     div.innerHTML = '';
-    if (usersArray.length === 0) {
+
+    if (!usersArray || usersArray.length === 0) {
         div.textContent = 'No one is online.';
         return;
     }
+
     const ul = document.createElement('ul');
     usersArray.forEach(u => {
         let li = document.createElement('li');
-        li.textContent = u;
+        // Покажем: username [ONLINE / SLEEP]
+        li.textContent = `${u.username} [${u.status}]`;
         ul.appendChild(li);
     });
     div.appendChild(ul);
