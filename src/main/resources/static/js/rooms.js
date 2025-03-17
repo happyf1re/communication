@@ -67,7 +67,7 @@ function joinRoom(roomName) {
     }
 
 
-    const domain = "meet.jit.si";
+    const domain = "video.alta-communication.ru";
 
     const options = {
         roomName: roomName,

@@ -36,7 +36,7 @@ build/
 # Build output
 /target/
 /out/
-/resources/application.properties
+
 
 # Logs and temp files
 *.log
