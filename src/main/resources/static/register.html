@@ -1,120 +1,92 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Register (Cookie-based)</title>
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
+    <meta charset="UTF-8" />
+    <title>Register – Alta Communication</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <style>
-        .container {
-            max-width: 400px;
-            margin-top: 50px;
-        }
+        body{background:#212529;color:#f8f9fa}
+        a,a.nav-link{color:#f8f9fa}
+        .container{max-width:420px;margin-top:50px}
+        label{margin-bottom:2px}
     </style>
 </head>
 <body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/index.html">Alta Communication</a>
+        <ul class="navbar-nav me-auto">
+            <li class="nav-item"><a class="nav-link" href="/login.html">Login</a></li>
+        </ul>
+    </div>
+</nav>
+
 <div class="container">
     <h3 class="mb-4">Register</h3>
 
     <div class="mb-3">
         <label for="username" class="form-label">Username</label>
-        <input type="text" class="form-control" id="username"/>
+        <input type="text" class="form-control" id="username" />
     </div>
-
     <div class="mb-3">
         <label for="password" class="form-label">Password</label>
-        <input type="password" class="form-control" id="password"/>
+        <input type="password" class="form-control" id="password" />
     </div>
-
     <div class="mb-3">
         <label for="department" class="form-label">Department (optional)</label>
-        <input type="text" class="form-control" id="department"/>
+        <input type="text" class="form-control" id="department" />
     </div>
-
     <div class="mb-3">
         <label for="firstName" class="form-label">First Name (optional)</label>
-        <input type="text" class="form-control" id="firstName"/>
+        <input type="text" class="form-control" id="firstName" />
     </div>
-
     <div class="mb-3">
         <label for="lastName" class="form-label">Last Name (optional)</label>
-        <input type="text" class="form-control" id="lastName"/>
+        <input type="text" class="form-control" id="lastName" />
     </div>
-
-    <!-- Новое поле для role: select с тремя вариантами -->
     <div class="mb-3">
         <label for="role" class="form-label">Role</label>
         <select class="form-select" id="role">
             <option value="EMPLOYEE">EMPLOYEE</option>
             <option value="MANAGER">MANAGER</option>
+            <option value="HR">HR</option>
             <option value="ADMIN">ADMIN</option>
         </select>
     </div>
 
-    <button id="registerBtn" class="btn btn-primary">Register</button>
-    <a href="/login.html" class="btn btn-link">Login</a>
+    <button id="registerBtn" class="btn btn-success w-100">Register</button>
+    <div class="text-center mt-2">
+        <a href="/login.html" class="link-light">Already have an account? Login</a>
+    </div>
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        document.getElementById('registerBtn').addEventListener('click', registerUser);
+    document.addEventListener('DOMContentLoaded',()=>{
+        document.getElementById('registerBtn').addEventListener('click',registerUser);
     });
 
-    async function registerUser() {
+    async function registerUser(){
         const username = document.getElementById('username').value.trim();
         const password = document.getElementById('password').value.trim();
         const department = document.getElementById('department').value.trim();
         const firstName = document.getElementById('firstName').value.trim();
-        const lastName = document.getElementById('lastName').value.trim();
-        const role = document.getElementById('role').value; // <-- берём значение из select
+        const lastName  = document.getElementById('lastName').value.trim();
+        const role      = document.getElementById('role').value;
 
-        if (!username || !password) {
-            alert("Username and password are required!");
-            return;
-        }
+        if(!username||!password){alert('Username and password are required');return;}
 
-        const payload = {
-            username,
-            password,
-            department,
-            firstName,
-            lastName,
-            role  // Важно: передаём role
-        };
-
-        // Допустим, бэк принимает POST /api/employees/register
-        const resp = await fetch("/api/employees/register", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        });
-
-        if (resp.ok) {
-            alert("Registration successful! Now logging in...");
-            // После регистрации — логинимся (через cookie)
-            await loginAfterRegister(username, password);
-        } else {
-            // Показываем ошибку
-            const text = await resp.text();
-            alert("Failed to register user:\n" + text);
-        }
-    }
-
-    async function loginAfterRegister(username, password) {
-        // Ваш логин-эндпоинт (cookie-based)
-        const resp = await fetch("/api/employees/cookie/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({ username, password })
-        });
-        if (resp.ok) {
-            window.location.href = "/";
-        } else {
-            alert("Registered but failed to login automatically — go login manually.");
-            window.location.href = "/login.html";
-        }
-    }
+        const payload={username,password,department,firstName,lastName,role};
+        try{
+            const r=await fetch('/api/employees/register',{
+                method:'POST',headers:{'Content-Type':'application/json'},
+                body:JSON.stringify(payload)});
+            if(!r.ok){throw new Error(await r.text());}
+            alert('Registration successful! Logging in…');
+            await fetch('/api/employees/cookie/login',{
+                method:'POST',headers:{'Content-Type':'application/json'},credentials:'include',
+                body:JSON.stringify({username,password})});
+            window.location.href='/';
+        }catch(e){alert('Failed: '+e.message);} }
 </script>
 </body>
 </html>

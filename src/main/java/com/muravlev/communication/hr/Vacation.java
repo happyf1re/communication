@@ -6,13 +6,12 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "vacations")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter @Setter
+@NoArgsConstructor @AllArgsConstructor
 @Builder
 public class Vacation {
 
@@ -20,21 +19,34 @@ public class Vacation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Сотрудник, который берёт отпуск
-    @ManyToOne
-    @JoinColumn(name = "employee_id")
+    /** Сотрудник, который подал заявку */
+    @ManyToOne @JoinColumn(name = "employee_id")
     @NotNull
     private Employee employee;
 
     @NotNull
     private LocalDate startDate;
+
     @NotNull
     private LocalDate endDate;
 
+    /** Текущее состояние заявки */
     @NotNull
     @Enumerated(EnumType.STRING)
-    private VacationStatus status;
+    private VacationStatus status = VacationStatus.REQUESTED;
 
-    private String comment; // Причина, примечание
+    /** Комментарий автора заявки */
+    private String comment;
+
+    /* ---------- новые поля для HR-процесса ---------- */
+
+    /** Кто утвердил / отклонил */
+    private String approverUsername;
+
+    /** Когда утвердил / отклонил */
+    private LocalDateTime approvedAt;
+
+    /** Комментарий HR при approve/reject */
+    private String hrComment;
 }
 

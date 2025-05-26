@@ -38,3 +38,11 @@ async function logout() {
     window.location.href = "/login.html";
 }
 
+async function getMyRole() {
+    const me = await whoAmI();
+    const r  = await fetch(`/api/employees/byUsername/${encodeURIComponent(me)}`);
+    if (!r.ok) throw new Error("Cannot load employee");
+    const emp = await r.json();
+    return emp.role;                                   // ADMIN | HR | …
+}
+

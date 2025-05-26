@@ -8,5 +8,6 @@ public interface VacationRepository extends JpaRepository<Vacation, Long> {
 
     // Можно сделать методы: найти все отпуска конкретного сотрудника
     List<Vacation> findByEmployeeId(Long employeeId);
+    List<Vacation> findByStatus(VacationStatus status);
 }
 

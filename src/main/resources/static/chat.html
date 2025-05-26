@@ -46,6 +46,9 @@
         <li class="nav-item"><a class="nav-link" href="/teams.html">Teams</a></li>
         <li class="nav-item"><a class="nav-link" href="/vacations.html">Vacations</a></li>
         <li class="nav-item"><a class="nav-link" href="/mytasks.html">MyTasks</a></li>
+        <li class="nav-item" id="navHr">            <!-- 👈 id добавлен -->
+          <a class="nav-link" href="/hr_vacations.html">HR Vacations</a>
+        </li>
       </ul>
       <button class="btn btn-outline-light" id="logoutBtn">Logout</button>
     </div>
@@ -76,12 +79,26 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', async () => {
+    // 1) проверяем логин
+    let me;
     try {
-      let user = await whoAmI();
-      console.log("User:", user);
+      me = await whoAmI();
     } catch(e) {
       window.location.href = "/login.html";
+      return;
     }
+
+    // 2) проверяем роль
+    try {
+      const resp = await fetch(`/api/employees/byUsername/${me}`);
+      const role = resp.ok ? (await resp.json()).role : "EMPLOYEE";
+      if (role !== "HR" && role !== "ADMIN") {
+        const navHr = document.getElementById('navHr');
+        if (navHr) navHr.style.display = 'none';
+      }
+    } catch(e) { /* если что-то пошло не так — прячем */ }
+
+    // 3) стандартный обработчик кнопки logout
     document.getElementById('logoutBtn').addEventListener('click', logout);
   });
 </script>

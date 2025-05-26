@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>HR – Vacations</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body{background:#212529;color:#f8f9fa}a,a.nav-link{color:#f8f9fa}
+        .vac-item{border:1px solid #666;padding:6px;margin-bottom:6px}
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/index.html">Alta Communication</a>
+        <ul class="navbar-nav me-auto">
+            <li class="nav-item"><a class="nav-link" href="/rooms.html">Rooms</a></li>
+            <li class="nav-item"><a class="nav-link" href="/chat.html">Chat</a></li>
+            <li class="nav-item"><a class="nav-link" href="/projects.html">Projects</a></li>
+            <li class="nav-item"><a class="nav-link" href="/teams.html">Teams</a></li>
+            <li class="nav-item"><a class="nav-link" href="/vacations.html">Vacations</a></li>
+            <li class="nav-item" id="navHr"><a class="nav-link active" href="/hr_vacations.html">HR Vacations</a></li>
+        </ul>
+        <button class="btn btn-outline-light" id="logoutBtn">Logout</button>
+    </div>
+</nav>
+
+<div class="container mt-3">
+    <!-- Pending list (HR only) -->
+    <h2 id="hdrPending">Pending vacation requests</h2>
+    <button class="btn btn-sm btn-primary mb-2" id="btnLoadPending">Reload</button>
+    <div id="pendingList"></div>
+
+    <hr/>
+    <!-- Calendar visible to everyone -->
+    <h2>Approved vacations calendar</h2>
+    <button class="btn btn-sm btn-secondary mb-2" id="btnLoadCalendar">Reload calendar</button>
+    <div id="calendar" class="table-responsive"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/common.js"></script>
+<script>
+    /* ---------- util ---------- */
+    function fmtDate(d){return d||'&ndash;'}
+    async function getMyRole(){
+        const me=await whoAmI();
+        const r=await fetch(`/api/employees/byUsername/${encodeURIComponent(me)}`);
+        if(!r.ok)throw new Error('Cannot load employee');
+        return (await r.json()).role;
+    }
+
+    /* ---------- pending list (HR) ---------- */
+    async function loadPending(){
+        const target=document.getElementById('pendingList');
+        target.innerHTML='<em>Loading…</em>';
+        try{
+            const r=await fetch('/api/vacations/hr/pending');
+            if(!r.ok)throw new Error(await r.text());
+            const arr=await r.json();
+            if(arr.length===0){target.innerHTML='<p>No pending requests.</p>';return;}
+            target.innerHTML='';
+            arr.forEach(v=>{
+                const d=document.createElement('div');d.className='vac-item';
+                d.innerHTML=`<strong>#${v.id}</strong> – <span class="text-info">${v.employee?.username}</span>
+        <br>${v.startDate} → ${v.endDate}
+        <br><small>${v.comment||''}</small>
+        <div class="mt-1">
+          <button class="btn btn-sm btn-success" onclick="approve(${v.id})">Approve</button>
+          <button class="btn btn-sm btn-danger"  onclick="reject(${v.id})">Reject</button>
+        </div>`;
+                target.appendChild(d);
+            });
+        }catch(e){target.innerHTML=`<span class="text-danger">${e.message}</span>`;}
+    }
+    async function approve(id){const c=prompt('HR comment','');await act(id,'approve',c);}
+    async function reject(id){const c=prompt('Reason for rejection','');if(c!==null)await act(id,'reject',c);}
+    async function act(id,what,comment){
+        try{
+            await fetch(`/api/vacations/hr/${id}/${what}`,{
+                method:'POST',headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({comment})});
+            loadPending();loadCalendar();
+        }catch(e){alert(e.message);} }
+
+    /* ---------- calendar ---------- */
+    async function loadCalendar(){
+        const cal=document.getElementById('calendar');
+        cal.innerHTML='<em>Loading…</em>';
+        try{
+            const r=await fetch('/api/vacations/calendar');
+            if(!r.ok)throw new Error(await r.text());
+            const arr=await r.json();
+            if(arr.length===0){cal.innerHTML='<p>No approved vacations.</p>';return;}
+            let html='<table class="table table-sm table-dark table-striped"><thead><tr><th>User</th><th>Start</th><th>End</th></tr></thead><tbody>';
+            arr.forEach(o=>{html+=`<tr><td>${o.username}</td><td>${o.start}</td><td>${o.end}</td></tr>`});
+            html+='</tbody></table>';cal.innerHTML=html;
+        }catch(e){cal.innerHTML=`<span class="text-danger">${e.message}</span>`;}
+    }
+
+    /* ---------- init ---------- */
+    document.addEventListener('DOMContentLoaded',async()=>{
+        try{await whoAmI();}catch(e){window.location.href='/login.html';return;}
+        const role=await getMyRole().catch(()=>"EMPLOYEE");
+        const isHr=(role==='HR'||role==='ADMIN');
+        if(!isHr){
+            // скрываем HR‑блоки
+            document.getElementById('btnLoadPending').style.display='none';
+            document.getElementById('hdrPending').style.display='none';
+        }else{
+            loadPending();
+        }
+        loadCalendar();
+        document.getElementById('btnLoadPending').addEventListener('click',loadPending);
+        document.getElementById('btnLoadCalendar').addEventListener('click',loadCalendar);
+        document.getElementById('logoutBtn').addEventListener('click',logout);
+    });
+</script>
+</body>
+</html>
